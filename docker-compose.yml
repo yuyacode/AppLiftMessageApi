@@ -1,0 +1,23 @@
+services:
+  message-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: company
+      DB2_DATABASE: student
+      DB3_DATABASE: common
+      DB_USERNAME: user3
+      DB_PASSWORD: password3
+    networks:
+      - applift_network
+
+networks:
+  applift_network:
+    external: true
