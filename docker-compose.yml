@@ -8,6 +8,8 @@ services:
     volumes:
       - .:/app
     environment:
+      ENV: dev
+      PORT: 8080
       DB_HOST: db
       DB_PORT: 3306
       DB_COMPANY: company
