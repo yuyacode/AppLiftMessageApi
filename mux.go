@@ -8,7 +8,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 
+	"github.com/yuyacode/AppLiftMessageApi/clock"
 	"github.com/yuyacode/AppLiftMessageApi/config"
+	"github.com/yuyacode/AppLiftMessageApi/handler"
+	"github.com/yuyacode/AppLiftMessageApi/service"
 	"github.com/yuyacode/AppLiftMessageApi/store"
 )
 
@@ -25,6 +28,24 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 			return nil, dbCloseFuncList, err
 		}
 	}
-	// muxの定義
+	clocker := clock.RealClocker{}
+	repo := &store.Repository{
+		Clocker: clocker,
+	}
+	// authハンドラー生成
+
+	gm := &handler.GetMessage{
+		Service: &service.GetMessage{
+			DB:    dbHandlerList,
+			Repo:  repo,
+			Owner: repo,
+		},
+		Validator: v,
+	}
+	mux.Route("/", func(r chi.Router) {
+		// ミドルウェア通す
+		r.Get("/", gm.ServeHTTP)
+	})
+
 	return mux, dbCloseFuncList, nil
 }

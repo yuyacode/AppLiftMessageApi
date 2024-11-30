@@ -1,72 +1,42 @@
 package main
 
 import (
-    "database/sql"
-    "encoding/json"
-    "fmt"
-    "log"
-    "net/http"
-    "os"
+	"context"
+	"fmt"
+	"log"
+	"net"
+	"os"
 
-    _ "github.com/go-sql-driver/mysql"
+	"github.com/yuyacode/AppLiftMessageApi/config"
 )
 
-type Record struct {
-    ID   int    `json:"id"`
-    Name string `json:"name"`
-}
-
 func main() {
-    dbHost := os.Getenv("DB_HOST")
-    dbPort := os.Getenv("DB_PORT")
-    dbName := os.Getenv("DB_DATABASE")
-    dbUser := os.Getenv("DB_USERNAME")
-    dbPassword := os.Getenv("DB_PASSWORD")
-
-    dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
-    db, err := sql.Open("mysql", dsn)
-    if err != nil {
-        log.Fatalf("Failed to connect to database: %v", err)
-    }
-    defer db.Close()
-
-    http.HandleFunc("/records", func(w http.ResponseWriter, r *http.Request) {
-		enableCORS(w) // CORS設定を適用
-        records, err := fetchRecords(db)
-        if err != nil {
-            http.Error(w, "Failed to fetch records", http.StatusInternalServerError)
-            return
-        }
-
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(records)
-    })
-
-    log.Println("Server started on :8080")
-    log.Fatal(http.ListenAndServe(":8080", nil))
+	if err := run(context.Background()); err != nil {
+		log.Printf("failed to terminate server: %v", err)
+		os.Exit(1)
+	}
 }
 
-func enableCORS(w http.ResponseWriter) {
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Access-Control-Allow-Methods", "GET, POST")
-    w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-}
-
-func fetchRecords(db *sql.DB) ([]Record, error) {
-    rows, err := db.Query("SELECT id, name FROM users")
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-
-    var records []Record
-    for rows.Next() {
-        var record Record
-        if err := rows.Scan(&record.ID, &record.Name); err != nil {
-            return nil, err
-        }
-        records = append(records, record)
-    }
-
-    return records, nil
+func run(ctx context.Context) error {
+	cfg, err := config.New()
+	if err != nil {
+		return err
+	}
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
+	if err != nil {
+		log.Fatalf("failed to listen port %d: %v", cfg.Port, err)
+	}
+	mux, dbCloseFuncList, err := NewMux(ctx, cfg)
+	if err != nil {
+		for _, dbCloseFunc := range dbCloseFuncList {
+			dbCloseFunc()
+		}
+		return err
+	}
+	for _, dbCloseFunc := range dbCloseFuncList {
+		defer func(f func()) {
+			f()
+		}(dbCloseFunc)
+	}
+	// サーバーを生成して起動する
 }
