@@ -7,6 +7,11 @@ import (
 	"net/http"
 )
 
+type SuccessResponse struct {
+	Message string   `json:"message"`
+	Details []string `json:"details,omitempty"`
+}
+
 type ErrResponse struct {
 	Message string   `json:"message"`
 	Details []string `json:"details,omitempty"`
