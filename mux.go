@@ -32,7 +32,21 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	repo := &store.Repository{
 		Clocker: clocker,
 	}
-	// authハンドラー生成
+	oAuthRepo := &store.OAuthRepository{
+		Clocker: clocker,
+	}
+
+	ro := &handler.RegisterOAuth{
+		Service: &service.RegisterOAuth{
+			DBHandlers:       dbHandlerList,
+			CredentialGetter: oAuthRepo,
+			CredentialSetter: oAuthRepo,
+		},
+		Validator: v,
+	}
+	mux.Route("/oauth", func(r chi.Router) {
+		r.Get("/register", ro.ServeHTTP)
+	})
 
 	gm := &handler.GetMessage{
 		Service: &service.GetMessage{

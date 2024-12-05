@@ -14,3 +14,16 @@ type MessageGetter interface {
 type MessageOwnerGetter interface {
 	GetThreadCompanyOwner(ctx context.Context, db store.Queryer, threadID entity.MessageThreadID) (int64, error)
 }
+
+type CredentialGetter interface {
+	GetAPIKey(ctx context.Context, db store.Queryer) (string, error)
+	SearchByClientID(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)
+	SearchByClientSecret(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)
+	SearchByAccessToken(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)
+	SearchByRefreshToken(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)
+}
+
+type CredentialSetter interface {
+	SaveClientIDSecret(ctx context.Context, db store.Execer, messageAPICredential *entity.MessageAPICredential) error
+	SaveToken(ctx context.Context, db store.Execer, messageAPICredential *entity.MessageAPICredential) error
+}
