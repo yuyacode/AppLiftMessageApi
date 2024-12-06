@@ -13,14 +13,14 @@ import (
 )
 
 type GetMessage struct {
-	DB    map[string]*sqlx.DB
-	Repo  MessageGetter
-	Owner MessageOwnerGetter
+	DBHandlers         map[string]*sqlx.DB
+	MessageGetter      MessageGetter
+	MessageOwnerGetter MessageOwnerGetter
 }
 
 func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 	messageThread := &entity.MessageThread{ID: messageThreadID}
-	companyUserID, err := g.Owner.GetThreadCompanyOwner(ctx, g.DB["common"], messageThread)
+	companyUserID, err := g.MessageOwnerGetter.GetThreadCompanyOwner(ctx, g.DBHandlers["common"], messageThread)
 	if err != nil {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,
@@ -40,7 +40,7 @@ func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.
 			fmt.Sprintf("unauthorized: lack the necessary permissions to retrieve messages"),
 		)
 	}
-	m, err := g.Repo.GetAllMessages(ctx, g.DB["common"], messageThreadID)
+	m, err := g.MessageGetter.GetAllMessages(ctx, g.DBHandlers["common"], messageThreadID)
 	if err != nil {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,

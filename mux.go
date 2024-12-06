@@ -50,9 +50,9 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 
 	gm := &handler.GetMessage{
 		Service: &service.GetMessage{
-			DB:    dbHandlerList,
-			Repo:  messageRepo,
-			Owner: messageRepo,
+			DBHandlers:         dbHandlerList,
+			MessageGetter:      messageRepo,
+			MessageOwnerGetter: messageRepo,
 		},
 		Validator: v,
 	}
