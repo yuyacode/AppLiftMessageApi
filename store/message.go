@@ -32,11 +32,10 @@ func (r *Repository) GetAllMessages(ctx context.Context, db Queryer, threadID en
 	return messages, nil
 }
 
-func (r *Repository) GetThreadCompanyOwner(ctx context.Context, db Queryer, threadID entity.MessageThreadID) (int64, error) {
+func (r *Repository) GetThreadCompanyOwner(ctx context.Context, db Queryer, messageThread *entity.MessageThread) (int64, error) {
 	query := "SELECT company_user_id FROM message_threads WHERE id = :id"
-	params := entity.MessageThread{ID: threadID}
 	var companyUserID int64
-	if err := db.GetContext(ctx, &companyUserID, query, params); err != nil {
+	if err := db.GetContext(ctx, &companyUserID, query, messageThread); err != nil {
 		return 0, err
 	}
 	return companyUserID, nil

@@ -18,7 +18,8 @@ type GetMessage struct {
 }
 
 func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
-	companyUserID, err := g.Owner.GetThreadCompanyOwner(ctx, g.DB["common"], messageThreadID)
+	messageThread := &entity.MessageThread{ID: messageThreadID}
+	companyUserID, err := g.Owner.GetThreadCompanyOwner(ctx, g.DB["common"], messageThread)
 	if err != nil {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,

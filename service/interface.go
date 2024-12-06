@@ -12,7 +12,7 @@ type MessageGetter interface {
 }
 
 type MessageOwnerGetter interface {
-	GetThreadCompanyOwner(ctx context.Context, db store.Queryer, threadID entity.MessageThreadID) (int64, error)
+	GetThreadCompanyOwner(ctx context.Context, db store.Queryer, messageThread *entity.MessageThread) (int64, error)
 }
 
 type CredentialGetter interface {
