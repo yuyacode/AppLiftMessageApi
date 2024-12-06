@@ -15,7 +15,7 @@ func (r *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, thre
 	query := `
         SELECT id, message_thread_id, is_from_company, is_from_student, content, is_unread, created_at, updated_at, deleted_at
         FROM messages
-        WHERE message_thread_id = ?
+        WHERE message_thread_id = ? AND deleted_at IS NULL
 		ORDER BY id ASC;
     `
 	rows, err := db.QueryxContext(ctx, query, threadID)
@@ -38,7 +38,7 @@ func (r *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, thre
 }
 
 func (r *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Queryer, messageThread *entity.MessageThread) (int64, error) {
-	query := "SELECT company_user_id FROM message_threads WHERE id = :id"
+	query := "SELECT company_user_id FROM message_threads WHERE id = :id AND deleted_at IS NULL;"
 	var companyUserID int64
 	if err := db.GetContext(ctx, &companyUserID, query, messageThread); err != nil {
 		return 0, err
