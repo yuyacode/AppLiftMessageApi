@@ -29,7 +29,7 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 		}
 	}
 	clocker := clock.RealClocker{}
-	repo := &store.Repository{
+	messageRepo := &store.MessageRepository{
 		Clocker: clocker,
 	}
 	oAuthRepo := &store.OAuthRepository{
@@ -51,8 +51,8 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	gm := &handler.GetMessage{
 		Service: &service.GetMessage{
 			DB:    dbHandlerList,
-			Repo:  repo,
-			Owner: repo,
+			Repo:  messageRepo,
+			Owner: messageRepo,
 		},
 		Validator: v,
 	}

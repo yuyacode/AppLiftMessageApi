@@ -3,10 +3,15 @@ package store
 import (
 	"context"
 
+	"github.com/yuyacode/AppLiftMessageApi/clock"
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 )
 
-func (r *Repository) GetAllMessages(ctx context.Context, db Queryer, threadID entity.MessageThreadID) (entity.Messages, error) {
+type MessageRepository struct {
+	Clocker clock.Clocker
+}
+
+func (r *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, threadID entity.MessageThreadID) (entity.Messages, error) {
 	query := `
         SELECT id, message_thread_id, is_from_company, is_from_student, content, is_unread, created_at, updated_at, deleted_at
         FROM messages
@@ -32,7 +37,7 @@ func (r *Repository) GetAllMessages(ctx context.Context, db Queryer, threadID en
 	return messages, nil
 }
 
-func (r *Repository) GetThreadCompanyOwner(ctx context.Context, db Queryer, messageThread *entity.MessageThread) (int64, error) {
+func (r *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Queryer, messageThread *entity.MessageThread) (int64, error) {
 	query := "SELECT company_user_id FROM message_threads WHERE id = :id"
 	var companyUserID int64
 	if err := db.GetContext(ctx, &companyUserID, query, messageThread); err != nil {
