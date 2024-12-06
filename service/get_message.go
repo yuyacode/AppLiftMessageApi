@@ -9,6 +9,7 @@ import (
 
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 	"github.com/yuyacode/AppLiftMessageApi/handler"
+	"github.com/yuyacode/AppLiftMessageApi/request"
 )
 
 type GetMessage struct {
@@ -26,7 +27,19 @@ func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.
 			fmt.Sprintf("failed to get threadCompanyOwner: %v", err),
 		)
 	}
-	// 認可判定
+	userID, ok := request.GetUserID(ctx)
+	if !ok {
+		return nil, handler.NewServiceError(
+			http.StatusInternalServerError,
+			fmt.Sprintf("failed to get userID"),
+		)
+	}
+	if userID != companyUserID {
+		return nil, handler.NewServiceError(
+			http.StatusForbidden,
+			fmt.Sprintf("unauthorized: lack the necessary permissions to retrieve messages"),
+		)
+	}
 	m, err := g.Repo.GetAllMessages(ctx, g.DB["common"], messageThreadID)
 	if err != nil {
 		return nil, handler.NewServiceError(
