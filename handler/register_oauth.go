@@ -37,6 +37,12 @@ func (ro *RegisterOAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx = request.SetUserID(ctx, b.UserID)
 	err := ro.Service.RegisterOAuth(ctx, b.APIKey)
 	if err != nil {
+		if serviceErr, ok := err.(*ServiceError); ok {
+			RespondJSON(ctx, w, &ErrResponse{
+				Message: serviceErr.Error(),
+			}, serviceErr.StatusCode)
+			return
+		}
 		RespondJSON(ctx, w, &ErrResponse{
 			Message: err.Error(),
 		}, http.StatusInternalServerError)

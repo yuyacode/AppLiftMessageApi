@@ -44,6 +44,12 @@ func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	messages, err := gm.Service.GetAllMessages(ctx, b.MessageThreadID)
 	if err != nil {
+		if serviceErr, ok := err.(*ServiceError); ok {
+			RespondJSON(ctx, w, &ErrResponse{
+				Message: serviceErr.Error(),
+			}, serviceErr.StatusCode)
+			return
+		}
 		RespondJSON(ctx, w, &ErrResponse{
 			Message: err.Error(),
 		}, http.StatusInternalServerError)
