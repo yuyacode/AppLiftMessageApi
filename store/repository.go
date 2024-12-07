@@ -12,6 +12,20 @@ import (
 	"github.com/yuyacode/AppLiftMessageApi/config"
 )
 
+type Execer interface {
+	NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
+}
+
+type Queryer interface {
+	QueryxContext(ctx context.Context, query string, args ...any) (*sqlx.Rows, error)
+	GetContext(ctx context.Context, dest interface{}, query string, args ...any) error
+}
+
+var (
+	_ Execer  = (*sqlx.DB)(nil)
+	_ Queryer = (*sqlx.DB)(nil)
+)
+
 func New(ctx context.Context, cfg *config.Config, targetDB string) (*sqlx.DB, func(), error) {
 	dbName, err := selectDB(cfg, targetDB)
 	if err != nil {
