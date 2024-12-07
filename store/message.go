@@ -11,6 +11,12 @@ type MessageRepository struct {
 	Clocker clock.Clocker
 }
 
+func NewMessageRepository(clocker clock.Clocker) *MessageRepository {
+	return &MessageRepository{
+		Clocker: clocker,
+	}
+}
+
 func (r *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, threadID entity.MessageThreadID) (entity.Messages, error) {
 	query := `
         SELECT id, message_thread_id, is_from_company, is_from_student, content, is_unread, created_at, updated_at, deleted_at

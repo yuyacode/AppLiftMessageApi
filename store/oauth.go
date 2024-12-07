@@ -12,6 +12,12 @@ type OAuthRepository struct {
 	Clocker clock.Clocker
 }
 
+func NewOAuthRepository(clocker clock.Clocker) *OAuthRepository {
+	return &OAuthRepository{
+		Clocker: clocker,
+	}
+}
+
 func (o *OAuthRepository) GetAPIKey(ctx context.Context, db Queryer) (string, error) {
 	query := "SELECT api_key FROM message_api_keys WHERE deleted_at IS NULL LIMIT 1;"
 	var apiKey string

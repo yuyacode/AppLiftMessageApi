@@ -18,7 +18,7 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	cfg, err := config.New()
+	cfg, err := config.NewConfig()
 	if err != nil {
 		return err
 	}
@@ -26,17 +26,17 @@ func run(ctx context.Context) error {
 	if err != nil {
 		log.Fatalf("failed to listen port %d: %v", cfg.Port, err)
 	}
-	mux, dbCloseFuncList, err := NewMux(ctx, cfg)
+	mux, dbCloseFuncs, err := NewMux(ctx, cfg)
 	if err != nil {
-		for _, dbCloseFunc := range dbCloseFuncList {
-			dbCloseFunc()
+		for _, f := range dbCloseFuncs {
+			f()
 		}
 		return err
 	}
-	for _, dbCloseFunc := range dbCloseFuncList {
+	for _, f := range dbCloseFuncs {
 		defer func(f func()) {
 			f()
-		}(dbCloseFunc)
+		}(f)
 	}
 	// サーバーを生成して起動する
 }

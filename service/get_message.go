@@ -18,6 +18,14 @@ type GetMessage struct {
 	MessageOwnerGetter MessageOwnerGetter
 }
 
+func NewGetMessage(dbHandlers map[string]*sqlx.DB, messageGetter MessageGetter, messageOwnerGetter MessageOwnerGetter) *GetMessage {
+	return &GetMessage{
+		DBHandlers:         dbHandlers,
+		MessageGetter:      messageGetter,
+		MessageOwnerGetter: messageOwnerGetter,
+	}
+}
+
 func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 	messageThread := &entity.MessageThread{ID: messageThreadID}
 	companyUserID, err := g.MessageOwnerGetter.GetThreadCompanyOwner(ctx, g.DBHandlers["common"], messageThread)

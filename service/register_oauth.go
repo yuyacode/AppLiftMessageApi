@@ -20,6 +20,14 @@ type RegisterOAuth struct {
 	CredentialSetter CredentialSetter
 }
 
+func NewRegisterOAuth(dbHandlers map[string]*sqlx.DB, credentialGetter CredentialGetter, credentialSetter CredentialSetter) *RegisterOAuth {
+	return &RegisterOAuth{
+		DBHandlers:       dbHandlers,
+		CredentialGetter: credentialGetter,
+		CredentialSetter: credentialSetter,
+	}
+}
+
 func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error {
 	appKind, ok := request.GetAppKind(ctx)
 	if !ok {

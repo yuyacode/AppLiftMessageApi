@@ -16,7 +16,7 @@ type Config struct {
 	DBPassword string `env:"DB_PASSWORD" envDefault:"password3"`
 }
 
-func New() (*Config, error) {
+func NewConfig() (*Config, error) {
 	cfg := &Config{}
 	if err := env.Parse(cfg); err != nil {
 		return nil, err

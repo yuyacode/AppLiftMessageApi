@@ -18,48 +18,29 @@ import (
 func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]func(), error) {
 	mux := chi.NewRouter()
 	v := validator.New()
-	targetDBList := [3]string{"company", "student", "common"}
-	var dbHandlerList = make(map[string]*sqlx.DB, len(targetDBList))
-	var dbCloseFuncList = make(map[string]func(), len(targetDBList))
+	dbList := [3]string{"company", "student", "common"}
+	var dbHandlers = make(map[string]*sqlx.DB, len(dbList))
+	var dbCloseFuncs = make(map[string]func(), len(dbList))
 	var err error
-	for _, v := range targetDBList {
-		dbHandlerList[v], dbCloseFuncList[v], err = store.New(ctx, cfg, v)
+	for _, v := range dbList {
+		dbHandlers[v], dbCloseFuncs[v], err = store.New(ctx, cfg, v)
 		if err != nil {
-			return nil, dbCloseFuncList, err
+			return nil, dbCloseFuncs, err
 		}
 	}
 	clocker := clock.RealClocker{}
-	messageRepo := &store.MessageRepository{
-		Clocker: clocker,
-	}
-	oAuthRepo := &store.OAuthRepository{
-		Clocker: clocker,
-	}
-
-	ro := &handler.RegisterOAuth{
-		Service: &service.RegisterOAuth{
-			DBHandlers:       dbHandlerList,
-			CredentialGetter: oAuthRepo,
-			CredentialSetter: oAuthRepo,
-		},
-		Validator: v,
-	}
+	oAuthRepo := store.NewOAuthRepository(clocker)
+	roService := service.NewRegisterOAuth(dbHandlers, oAuthRepo, oAuthRepo)
+	roHandler := handler.NewRegisterOAuth(roService, v)
 	mux.Route("/oauth", func(r chi.Router) {
-		r.Get("/register", ro.ServeHTTP)
+		r.Get("/register", roHandler.ServeHTTP)
 	})
-
-	gm := &handler.GetMessage{
-		Service: &service.GetMessage{
-			DBHandlers:         dbHandlerList,
-			MessageGetter:      messageRepo,
-			MessageOwnerGetter: messageRepo,
-		},
-		Validator: v,
-	}
+	messageRepo := store.NewMessageRepository(clocker)
+	gmService := service.NewGetMessage(dbHandlers, messageRepo, messageRepo)
+	gmHandler := handler.NewGetMessage(gmService, v)
 	mux.Route("/", func(r chi.Router) {
 		// ミドルウェア通す
-		r.Get("/", gm.ServeHTTP)
+		r.Get("/", gmHandler.ServeHTTP)
 	})
-
-	return mux, dbCloseFuncList, nil
+	return mux, dbCloseFuncs, nil
 }

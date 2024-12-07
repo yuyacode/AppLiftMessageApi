@@ -14,6 +14,13 @@ type RegisterOAuth struct {
 	Validator *validator.Validate
 }
 
+func NewRegisterOAuth(service RegisterOAuthService, validator *validator.Validate) *RegisterOAuth {
+	return &RegisterOAuth{
+		Service:   service,
+		Validator: validator,
+	}
+}
+
 func (ro *RegisterOAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var b struct {

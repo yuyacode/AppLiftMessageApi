@@ -25,6 +25,13 @@ type message struct {
 	UpdatedAt     time.Time        `json:"updated_at"      db:"updated_at"`
 }
 
+func NewGetMessage(service GetMessageService, validator *validator.Validate) *GetMessage {
+	return &GetMessage{
+		Service:   service,
+		Validator: validator,
+	}
+}
+
 func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var b struct {
