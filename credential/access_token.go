@@ -11,8 +11,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func GenerateToken(appKind string, userID int64) (string, error) {
-	secretKey, err := getTokenSecretKey()
+func GenerateAccessToken(appKind string, userID int64) (string, error) {
+	secretKey, err := getAccessTokenSecretKey()
 	if err != nil {
 		return "", err
 	}
@@ -35,13 +35,13 @@ func GenerateToken(appKind string, userID int64) (string, error) {
 	return base64.StdEncoding.EncodeToString(combined), nil
 }
 
-func getTokenSecretKey() ([]byte, error) {
+func getAccessTokenSecretKey() ([]byte, error) {
 	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
-	secretKeyBase64 := os.Getenv("TOKEN_SECRET_KEY")
+	secretKeyBase64 := os.Getenv("ACCESS_TOKEN_SECRET_KEY")
 	if secretKeyBase64 == "" {
-		return nil, fmt.Errorf("TOKEN_SECRET_KEY environment variable not set")
+		return nil, fmt.Errorf("ACCESS_TOKEN_SECRET_KEY environment variable not set")
 	}
 	return base64.StdEncoding.DecodeString(secretKeyBase64)
 }

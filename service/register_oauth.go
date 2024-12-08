@@ -118,7 +118,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		)
 	}
 	for i := 0; i < 5; i++ {
-		access_token, err := credential.GenerateToken(appKind, userID)
+		access_token, err := credential.GenerateAccessToken(appKind, userID)
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -144,7 +144,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		}
 	}
 	for i := 0; i < 5; i++ {
-		refresh_token, err := credential.GenerateToken(appKind, userID)
+		refresh_token, err := credential.GenerateRefreshToken(appKind, userID)
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
