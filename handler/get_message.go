@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -34,22 +34,31 @@ func NewGetMessage(service GetMessageService, validator *validator.Validate) *Ge
 
 func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	var b struct {
-		MessageThreadID entity.MessageThreadID `json:"message_thread_id" validate:"required"`
+	var qp struct {
+		MessageThreadID entity.MessageThreadID `validate:"required"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+	threadIDStr := r.URL.Query().Get("thread_id")
+	if threadIDStr == "" {
 		RespondJSON(ctx, w, &ErrResponse{
-			Message: err.Error(),
+			Message: "missing required query parameter: thread_id",
+		}, http.StatusBadRequest)
+		return
+	}
+	threadIDInt, err := strconv.ParseInt(threadIDStr, 10, 64)
+	if err != nil {
+		RespondJSON(ctx, w, &ErrResponse{
+			Message: "invalid format for query parameter: thread_id. Must be a valid integer",
 		}, http.StatusInternalServerError)
 		return
 	}
-	if err := gm.Validator.Struct(b); err != nil {
+	qp.MessageThreadID = entity.MessageThreadID(threadIDInt)
+	if err := gm.Validator.Struct(qp); err != nil {
 		RespondJSON(ctx, w, &ErrResponse{
 			Message: err.Error(),
 		}, http.StatusBadRequest)
 		return
 	}
-	messages, err := gm.Service.GetAllMessages(ctx, b.MessageThreadID)
+	messages, err := gm.Service.GetAllMessages(ctx, qp.MessageThreadID)
 	if err != nil {
 		if serviceErr, ok := err.(*ServiceError); ok {
 			RespondJSON(ctx, w, &ErrResponse{
