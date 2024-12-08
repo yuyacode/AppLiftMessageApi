@@ -39,13 +39,13 @@ func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.
 	if !ok {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get userID"),
+			"failed to get userID",
 		)
 	}
 	if userID != companyUserID {
 		return nil, handler.NewServiceError(
 			http.StatusForbidden,
-			fmt.Sprintf("unauthorized: lack the necessary permissions to retrieve messages"),
+			"unauthorized: lack the necessary permissions to retrieve messages",
 		)
 	}
 	m, err := g.MessageGetter.GetAllMessages(ctx, g.DBHandlers["common"], messageThreadID)

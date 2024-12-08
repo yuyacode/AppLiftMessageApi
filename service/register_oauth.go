@@ -33,7 +33,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 	if !ok {
 		return handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get app kind"),
+			"failed to get app kind",
 		)
 	}
 	validAPIKey, err := r.CredentialGetter.GetAPIKey(ctx, r.DBHandlers[appKind])
@@ -46,7 +46,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 	if apiKey != validAPIKey {
 		return handler.NewServiceError(
 			http.StatusBadRequest,
-			fmt.Sprintf("API Key is invalid"),
+			"API Key is invalid",
 		)
 	}
 	messageAPICredential := &entity.MessageAPICredential{}
@@ -72,7 +72,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if i == 4 {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to generate client_id 5 times"),
+				"failed to generate client_id 5 times",
 			)
 		}
 	}
@@ -98,7 +98,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if i == 4 {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to generate client_secret 5 times"),
+				"failed to generate client_secret 5 times",
 			)
 		}
 	}
@@ -106,7 +106,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 	if !ok {
 		return handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get userID"),
+			"failed to get userID",
 		)
 	}
 	messageAPICredential.UserID = userID
@@ -139,7 +139,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if i == 4 {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to generate access_token 5 times"),
+				"failed to generate access_token 5 times",
 			)
 		}
 	}
@@ -165,7 +165,7 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if i == 4 {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to generate refresh_token 5 times"),
+				"failed to generate refresh_token 5 times",
 			)
 		}
 	}
