@@ -32,15 +32,19 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	oAuthRepo := store.NewOAuthRepository(clocker)
 	roService := service.NewRegisterOAuth(dbHandlers, oAuthRepo, oAuthRepo)
 	roHandler := handler.NewRegisterOAuth(roService, v)
-	mux.Route("/oauth", func(r chi.Router) {
+	mux.Route("/messages", func(r chi.Router) {
 		r.Post("/register", roHandler.ServeHTTP)
+		// r.With(RefreshTokenMiddleware).Post("/token", fooHandler.ServeHTTP)
 	})
 	messageRepo := store.NewMessageRepository(clocker)
 	gmService := service.NewGetMessage(dbHandlers, messageRepo, messageRepo)
 	gmHandler := handler.NewGetMessage(gmService, v)
-	mux.Route("/", func(r chi.Router) {
-		// ミドルウェア通す
+	mux.Route("/messages", func(r chi.Router) {
+		// r.Use(AccessTokenMiddleware)
 		r.Get("/", gmHandler.ServeHTTP)
+		// r.Post("/", fooHandler.ServeHTTP)
+		// r.Patch("/{id}", fooHandler.ServeHTTP)
+		// r.Delete("/{id}", fooHandler.ServeHTTP)
 	})
 	return mux, dbCloseFuncs, nil
 }
