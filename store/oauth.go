@@ -92,3 +92,12 @@ func (o *OAuthRepository) SaveToken(ctx context.Context, db Execer, messageAPICr
 	}
 	return nil
 }
+
+func (o *OAuthRepository) GetAccessToken(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error) {
+	query := "SELECT access_token, expires_at FROM message_api_credentials WHERE user_id = :user_id AND deleted_at IS NULL LIMIT 1;"
+	var result *entity.MessageAPICredential
+	if err := db.GetContext(ctx, result, query, param); err != nil {
+		return nil, err
+	}
+	return result, nil
+}

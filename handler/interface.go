@@ -13,3 +13,7 @@ type GetMessageService interface {
 type RegisterOAuthService interface {
 	RegisterOAuth(ctx context.Context, apiKey string) error
 }
+
+type VerifyAccessTokenService interface {
+	VerifyAccessToken(ctx context.Context, accessToken string) (string, int64, error)
+}
