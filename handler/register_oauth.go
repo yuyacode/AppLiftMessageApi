@@ -47,6 +47,7 @@ func (ro *RegisterOAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if serviceErr, ok := err.(*ServiceError); ok {
 			RespondJSON(ctx, w, &ErrResponse{
 				Message: serviceErr.Error(),
+				Detail:  serviceErr.DetailError(),
 			}, serviceErr.StatusCode)
 			return
 		}

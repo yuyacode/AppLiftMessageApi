@@ -33,6 +33,7 @@ func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,
 			fmt.Sprintf("failed to get threadCompanyOwner: %v", err),
+			"",
 		)
 	}
 	userID, ok := request.GetUserID(ctx)
@@ -40,12 +41,14 @@ func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,
 			"failed to get userID",
+			"",
 		)
 	}
 	if userID != companyUserID {
 		return nil, handler.NewServiceError(
 			http.StatusForbidden,
 			"unauthorized: lack the necessary permissions to retrieve messages",
+			"",
 		)
 	}
 	m, err := g.MessageGetter.GetAllMessages(ctx, g.DBHandlers["common"], messageThreadID)
@@ -53,6 +56,7 @@ func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,
 			fmt.Sprintf("failed to get message: %v", err),
+			"",
 		)
 	}
 	return m, nil
