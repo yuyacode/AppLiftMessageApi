@@ -11,13 +11,13 @@ import (
 )
 
 type SuccessResponse struct {
-	Message string   `json:"message"`
-	Details []string `json:"details,omitempty"`
+	Message string `json:"message"`
+	Detail  string `json:"detail,omitempty"`
 }
 
 type ErrResponse struct {
-	Message string   `json:"message"`
-	Details []string `json:"details,omitempty"`
+	Message string `json:"message"`
+	Detail  string `json:"detail,omitempty"`
 }
 
 func RespondJSON(ctx context.Context, w http.ResponseWriter, body any, status int) {
