@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -32,8 +31,8 @@ func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.
 	if err != nil {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get threadCompanyOwner: %v", err),
-			"",
+			"failed to get threadCompanyOwner",
+			err.Error(),
 		)
 	}
 	userID, ok := request.GetUserID(ctx)
@@ -55,8 +54,8 @@ func (g *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.
 	if err != nil {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get message: %v", err),
-			"",
+			"failed to get message",
+			err.Error(),
 		)
 	}
 	return m, nil

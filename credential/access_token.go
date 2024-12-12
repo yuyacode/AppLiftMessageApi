@@ -45,32 +45,32 @@ func DecryptAccessToken(accessToken string) (string, int64, error) {
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to decode access token: %v", err),
-			"",
+			"failed to decode access token",
+			err.Error(),
 		)
 	}
 	secretKey, err := getAccessTokenSecretKey()
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get access token secret key: %v", err),
-			"",
+			"failed to get access token secret key",
+			err.Error(),
 		)
 	}
 	block, err := aes.NewCipher(secretKey)
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to create cipher block: %v", err),
-			"",
+			"failed to create cipher block",
+			err.Error(),
 		)
 	}
 	aesGCM, err := cipher.NewGCM(block)
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to create GCM: %v", err),
-			"",
+			"failed to create GCM",
+			err.Error(),
 		)
 	}
 	if len(decoded) < aesGCM.NonceSize() {
@@ -85,8 +85,8 @@ func DecryptAccessToken(accessToken string) (string, int64, error) {
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to decrypt access token: %v", err),
-			"",
+			"failed to decrypt access token",
+			err.Error(),
 		)
 	}
 	parsedData := string(plainText)

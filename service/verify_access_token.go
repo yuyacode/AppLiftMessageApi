@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -37,8 +36,8 @@ func (vat *VerifyAccessToken) VerifyAccessToken(ctx context.Context, accessToken
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get access_token: %v", err),
-			"",
+			"failed to get access_token",
+			err.Error(),
 		)
 	}
 	if accessToken != validAccessToken.AccessToken {
@@ -52,8 +51,8 @@ func (vat *VerifyAccessToken) VerifyAccessToken(ctx context.Context, accessToken
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get timezone: %v", err),
-			"",
+			"failed to get timezone",
+			err.Error(),
 		)
 	}
 	expiresAtJST := validAccessToken.ExpiresAt.In(loc) // 本来はこの変換を不要にしたい。DBから取ってきた時点でJSTになっているか後ほど確認

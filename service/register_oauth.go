@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -41,8 +40,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 	if err != nil {
 		return handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to get API Key: %v", err),
-			"",
+			"failed to get API Key",
+			err.Error(),
 		)
 	}
 	if apiKey != validAPIKey {
@@ -58,8 +57,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to generate client_id: %v", err),
-				"",
+				"failed to generate client_id",
+				err.Error(),
 			)
 		}
 		messageAPICredential.ClientID = clientID
@@ -67,8 +66,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to search client_id: %v", err),
-				"",
+				"failed to search client_id",
+				err.Error(),
 			)
 		}
 		if !exist {
@@ -87,8 +86,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to generate client_secret: %v", err),
-				"",
+				"failed to generate client_secret",
+				err.Error(),
 			)
 		}
 		messageAPICredential.ClientSecret = clientSecret
@@ -96,8 +95,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to search client_secret: %v", err),
-				"",
+				"failed to search client_secret",
+				err.Error(),
 			)
 		}
 		if !exist {
@@ -124,8 +123,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 	if err != nil {
 		return handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to insert message api client_id and client_secret: %v", err),
-			"",
+			"failed to insert message api client_id and client_secret",
+			err.Error(),
 		)
 	}
 	for i := 0; i < 5; i++ {
@@ -133,8 +132,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to generate access_token: %v", err),
-				"",
+				"failed to generate access_token",
+				err.Error(),
 			)
 		}
 		messageAPICredential.AccessToken = access_token
@@ -142,8 +141,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to search access_token: %v", err),
-				"",
+				"failed to search access_token",
+				err.Error(),
 			)
 		}
 		if !exist {
@@ -162,8 +161,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to generate refresh_token: %v", err),
-				"",
+				"failed to generate refresh_token",
+				err.Error(),
 			)
 		}
 		messageAPICredential.RefreshToken = refresh_token
@@ -171,8 +170,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
-				fmt.Sprintf("failed to search refresh_token: %v", err),
-				"",
+				"failed to search refresh_token",
+				err.Error(),
 			)
 		}
 		if !exist {
@@ -191,8 +190,8 @@ func (r *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error 
 	if err != nil {
 		return handler.NewServiceError(
 			http.StatusInternalServerError,
-			fmt.Sprintf("failed to save token: %v", err),
-			"",
+			"failed to save token",
+			err.Error(),
 		)
 	}
 	return nil
