@@ -101,6 +101,13 @@ func DecryptAccessToken(accessToken string) (string, int64, error) {
 	var appKind string
 	if strings.HasPrefix(parts[0], "appkind:") {
 		appKind = strings.TrimPrefix(parts[0], "appkind:")
+		if appKind != "company" && appKind != "student" {
+			return "", 0, handler.NewServiceError(
+				http.StatusUnauthorized,
+				"invalid_token",
+				fmt.Sprintf("invalid appkind in access token: %v", err),
+			)
+		}
 	} else {
 		return "", 0, handler.NewServiceError(
 			http.StatusUnauthorized,
