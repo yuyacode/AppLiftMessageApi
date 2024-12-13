@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/yuyacode/AppLiftMessageApi/request"
 )
@@ -12,11 +10,11 @@ func VerifyAccessTokenMiddleware(vat VerifyAccessTokenService) func(next http.Ha
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			accessToken, err := extractAccessToken(r)
+			accessToken, err := extractAuthorizationHeader(r)
 			if err != nil {
 				RespondJSON(ctx, w, ErrResponse{
 					Message: "invalid_token",
-					Detail:  fmt.Sprintf("not found oauth info: %v", err),
+					Detail:  err.Error(),
 				}, http.StatusUnauthorized)
 				return
 			}
@@ -40,19 +38,4 @@ func VerifyAccessTokenMiddleware(vat VerifyAccessTokenService) func(next http.Ha
 			next.ServeHTTP(w, clone)
 		})
 	}
-}
-
-func extractAccessToken(r *http.Request) (string, error) {
-	authorizationHeader := r.Header.Get("Authorization")
-	if authorizationHeader == "" {
-		return "", fmt.Errorf("missing Authorization header")
-	}
-	if !strings.HasPrefix(authorizationHeader, "Bearer ") {
-		return "", fmt.Errorf("invalid Authorization header format")
-	}
-	accessToken := strings.TrimPrefix(authorizationHeader, "Bearer ")
-	if accessToken == "" {
-		return "", fmt.Errorf("empty accessToken")
-	}
-	return accessToken, nil
 }
