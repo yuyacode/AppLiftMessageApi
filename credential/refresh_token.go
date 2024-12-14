@@ -5,13 +5,15 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
+
+	"github.com/yuyacode/AppLiftMessageApi/handler"
 )
 
 func GenerateRefreshToken(appKind string, userID int64) (string, error) {
@@ -41,48 +43,95 @@ func GenerateRefreshToken(appKind string, userID int64) (string, error) {
 func DecryptRefreshToken(refreshToken string) (string, int64, error) {
 	decoded, err := base64.StdEncoding.DecodeString(refreshToken)
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to decode refresh token: %w", err)
+		return "", 0, handler.NewServiceError(
+			http.StatusInternalServerError,
+			"failed to decode refresh token",
+			err.Error(),
+		)
 	}
 	secretKey, err := getRefreshTokenSecretKey()
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to get refresh token secret key: %w", err)
+		return "", 0, handler.NewServiceError(
+			http.StatusInternalServerError,
+			"failed to get refresh token secret key",
+			err.Error(),
+		)
 	}
 	block, err := aes.NewCipher(secretKey)
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to create cipher block: %w", err)
+		return "", 0, handler.NewServiceError(
+			http.StatusInternalServerError,
+			"failed to create cipher block",
+			err.Error(),
+		)
 	}
 	aesGCM, err := cipher.NewGCM(block)
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to create GCM: %w", err)
+		return "", 0, handler.NewServiceError(
+			http.StatusInternalServerError,
+			"failed to create GCM",
+			err.Error(),
+		)
 	}
 	if len(decoded) < aesGCM.NonceSize() {
-		return "", 0, errors.New("refresh token too short")
+		return "", 0, handler.NewServiceError(
+			http.StatusUnauthorized,
+			"invalid_token",
+			"refresh token too short",
+		)
 	}
 	nonce, cipherText := decoded[:aesGCM.NonceSize()], decoded[aesGCM.NonceSize():]
 	plainText, err := aesGCM.Open(nil, nonce, cipherText, nil)
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to decrypt refresh token: %w", err)
+		return "", 0, handler.NewServiceError(
+			http.StatusInternalServerError,
+			"failed to decrypt refresh token",
+			err.Error(),
+		)
 	}
 	parsedData := string(plainText)
 	parts := strings.Split(parsedData, "|")
 	if len(parts) != 3 {
-		return "", 0, errors.New("invalid refresh token format")
+		return "", 0, handler.NewServiceError(
+			http.StatusUnauthorized,
+			"invalid_token",
+			"invalid refresh token format",
+		)
 	}
 	var appKind string
 	if strings.HasPrefix(parts[0], "appkind:") {
 		appKind = strings.TrimPrefix(parts[0], "appkind:")
+		if appKind != "company" && appKind != "student" {
+			return "", 0, handler.NewServiceError(
+				http.StatusUnauthorized,
+				"invalid_token",
+				fmt.Sprintf("invalid appkind in refresh token: %v", err),
+			)
+		}
 	} else {
-		return "", 0, errors.New("appkind not found in refresh token")
+		return "", 0, handler.NewServiceError(
+			http.StatusUnauthorized,
+			"invalid_token",
+			"appkind not found in refresh token",
+		)
 	}
 	var userID int64
 	if strings.HasPrefix(parts[1], "user_id:") {
 		userIDStr := strings.TrimPrefix(parts[1], "user_id:")
 		userID, err = strconv.ParseInt(userIDStr, 10, 64)
 		if err != nil {
-			return "", 0, fmt.Errorf("invalid user_id in refresh token: %w", err)
+			return "", 0, handler.NewServiceError(
+				http.StatusUnauthorized,
+				"invalid_token",
+				fmt.Sprintf("invalid user_id in refresh token: %v", err),
+			)
 		}
 	} else {
-		return "", 0, errors.New("user_id not found in refresh token")
+		return "", 0, handler.NewServiceError(
+			http.StatusUnauthorized,
+			"invalid_token",
+			"user_id not found in refresh token",
+		)
 	}
 	return appKind, userID, nil
 }
