@@ -6,8 +6,12 @@ import (
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 )
 
-type GetMessageService interface {
-	GetAllMessages(ctx context.Context, messageThreadID entity.MessageThreadID) (entity.Messages, error)
+type VerifyAccessTokenService interface {
+	VerifyAccessToken(ctx context.Context, accessToken string) (string, int64, error)
+}
+
+type VerifyRefreshTokenService interface {
+	VerifyRefreshToken(ctx context.Context, refreshToken string) (string, int64, error)
 }
 
 type RegisterOAuthService interface {
@@ -18,10 +22,6 @@ type RefreshAccessTokenService interface {
 	RefreshAccessToken(ctx context.Context, client_id, client_secret string) (string, error)
 }
 
-type VerifyAccessTokenService interface {
-	VerifyAccessToken(ctx context.Context, accessToken string) (string, int64, error)
-}
-
-type VerifyRefreshTokenService interface {
-	VerifyRefreshToken(ctx context.Context, refreshToken string) (string, int64, error)
+type GetMessageService interface {
+	GetAllMessages(ctx context.Context, messageThreadID entity.MessageThreadID) (entity.Messages, error)
 }

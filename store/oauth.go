@@ -45,6 +45,24 @@ func (o *OAuthRepository) GetClientSecret(ctx context.Context, db Queryer, param
 	return clientSecret, nil
 }
 
+func (o *OAuthRepository) GetAccessToken(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error) {
+	query := "SELECT access_token, expires_at FROM message_api_credentials WHERE user_id = :user_id AND deleted_at IS NULL LIMIT 1;"
+	var result *entity.MessageAPICredential
+	if err := db.GetContext(ctx, result, query, param); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (o *OAuthRepository) GetRefreshToken(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error) {
+	query := "SELECT refresh_token FROM message_api_credentials WHERE user_id = :user_id AND deleted_at IS NULL LIMIT 1;"
+	var result *entity.MessageAPICredential
+	if err := db.GetContext(ctx, result, query, param); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (o *OAuthRepository) SearchByClientID(ctx context.Context, db Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error) {
 	query := "SELECT 1 FROM message_api_credentials WHERE client_id = :client_id AND deleted_at IS NULL LIMIT 1;"
 	var dummy int
@@ -67,15 +85,6 @@ func (o *OAuthRepository) SearchByClientSecret(ctx context.Context, db Queryer, 
 		return false, err
 	}
 	return true, nil
-}
-
-func (o *OAuthRepository) SaveClientIDSecret(ctx context.Context, db Execer, messageAPICredential *entity.MessageAPICredential) error {
-	query := "INSERT INTO message_api_credentials (user_id, client_id, client_secret) VALUES (:user_id, :client_id, :client_secret);"
-	_, err := db.NamedExecContext(ctx, query, messageAPICredential)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (o *OAuthRepository) SearchByAccessToken(ctx context.Context, db Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error) {
@@ -102,8 +111,8 @@ func (o *OAuthRepository) SearchByRefreshToken(ctx context.Context, db Queryer, 
 	return true, nil
 }
 
-func (o *OAuthRepository) SaveToken(ctx context.Context, db Execer, messageAPICredential *entity.MessageAPICredential) error {
-	query := "UPDATE message_api_credentials SET access_token = :access_token, refresh_token = :refresh_token, expires_at = :expires_at WHERE user_id = :user_id;"
+func (o *OAuthRepository) SaveClientIDSecret(ctx context.Context, db Execer, messageAPICredential *entity.MessageAPICredential) error {
+	query := "INSERT INTO message_api_credentials (user_id, client_id, client_secret) VALUES (:user_id, :client_id, :client_secret);"
 	_, err := db.NamedExecContext(ctx, query, messageAPICredential)
 	if err != nil {
 		return err
@@ -111,20 +120,11 @@ func (o *OAuthRepository) SaveToken(ctx context.Context, db Execer, messageAPICr
 	return nil
 }
 
-func (o *OAuthRepository) GetAccessToken(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error) {
-	query := "SELECT access_token, expires_at FROM message_api_credentials WHERE user_id = :user_id AND deleted_at IS NULL LIMIT 1;"
-	var result *entity.MessageAPICredential
-	if err := db.GetContext(ctx, result, query, param); err != nil {
-		return nil, err
+func (o *OAuthRepository) SaveToken(ctx context.Context, db Execer, messageAPICredential *entity.MessageAPICredential) error {
+	query := "UPDATE message_api_credentials SET access_token = :access_token, refresh_token = :refresh_token, expires_at = :expires_at WHERE user_id = :user_id;"
+	_, err := db.NamedExecContext(ctx, query, messageAPICredential)
+	if err != nil {
+		return err
 	}
-	return result, nil
-}
-
-func (o *OAuthRepository) GetRefreshToken(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error) {
-	query := "SELECT refresh_token FROM message_api_credentials WHERE user_id = :user_id AND deleted_at IS NULL LIMIT 1;"
-	var result *entity.MessageAPICredential
-	if err := db.GetContext(ctx, result, query, param); err != nil {
-		return nil, err
-	}
-	return result, nil
+	return nil
 }
