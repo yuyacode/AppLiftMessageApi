@@ -27,6 +27,24 @@ func (o *OAuthRepository) GetAPIKey(ctx context.Context, db Queryer) (string, er
 	return apiKey, nil
 }
 
+func (o *OAuthRepository) GetClientID(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (string, error) {
+	query := "SELECT client_id FROM message_api_credentials WHERE user_id = :user_id AND deleted_at IS NULL LIMIT 1;"
+	var clientID string
+	if err := db.GetContext(ctx, &clientID, query, param); err != nil {
+		return "", err
+	}
+	return clientID, nil
+}
+
+func (o *OAuthRepository) GetClientSecret(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (string, error) {
+	query := "SELECT client_secret FROM message_api_credentials WHERE user_id = :user_id AND deleted_at IS NULL LIMIT 1;"
+	var clientSecret string
+	if err := db.GetContext(ctx, &clientSecret, query, param); err != nil {
+		return "", err
+	}
+	return clientSecret, nil
+}
+
 func (o *OAuthRepository) SearchByClientID(ctx context.Context, db Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error) {
 	query := "SELECT 1 FROM message_api_credentials WHERE client_id = :client_id AND deleted_at IS NULL LIMIT 1;"
 	var dummy int

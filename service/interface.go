@@ -17,6 +17,8 @@ type MessageOwnerGetter interface {
 
 type CredentialGetter interface {
 	GetAPIKey(ctx context.Context, db store.Queryer) (string, error)
+	GetClientID(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (string, error)
+	GetClientSecret(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (string, error)
 	SearchByClientID(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)
 	SearchByClientSecret(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)
 	SearchByAccessToken(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)

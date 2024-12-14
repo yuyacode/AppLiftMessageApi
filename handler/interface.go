@@ -14,6 +14,10 @@ type RegisterOAuthService interface {
 	RegisterOAuth(ctx context.Context, apiKey string) error
 }
 
+type RefreshAccessTokenService interface {
+	RefreshAccessToken(ctx context.Context, client_id, client_secret string) (string, error)
+}
+
 type VerifyAccessTokenService interface {
 	VerifyAccessToken(ctx context.Context, accessToken string) (string, int64, error)
 }
