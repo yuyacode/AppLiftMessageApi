@@ -17,7 +17,7 @@ func NewMessageRepository(clocker clock.Clocker) *MessageRepository {
 	}
 }
 
-func (r *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, threadID entity.MessageThreadID) (entity.Messages, error) {
+func (mr *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, threadID entity.MessageThreadID) (entity.Messages, error) {
 	query := `
         SELECT id, message_thread_id, is_from_company, is_from_student, content, is_unread, created_at, updated_at, deleted_at
         FROM messages
@@ -43,7 +43,7 @@ func (r *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, thre
 	return messages, nil
 }
 
-func (r *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Queryer, param *entity.MessageThread) (int64, error) {
+func (mr *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Queryer, param *entity.MessageThread) (int64, error) {
 	query := "SELECT company_user_id FROM message_threads WHERE id = :id AND deleted_at IS NULL;"
 	var companyUserID int64
 	if err := db.GetContext(ctx, &companyUserID, query, param); err != nil {

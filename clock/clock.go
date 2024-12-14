@@ -10,7 +10,7 @@ type Clocker interface {
 
 type RealClocker struct{}
 
-func (r RealClocker) Now() time.Time {
+func (rc RealClocker) Now() time.Time {
 	return time.Now()
 }
 

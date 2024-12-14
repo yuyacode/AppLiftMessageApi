@@ -6,12 +6,12 @@ type ServiceError struct {
 	Detail     string
 }
 
-func (e *ServiceError) Error() string {
-	return e.Message
+func (se *ServiceError) Error() string {
+	return se.Message
 }
 
-func (e *ServiceError) DetailError() string {
-	return e.Detail
+func (se *ServiceError) DetailError() string {
+	return se.Detail
 }
 
 func NewServiceError(statusCode int, message, detail string) *ServiceError {
