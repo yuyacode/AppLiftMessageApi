@@ -17,3 +17,7 @@ type RegisterOAuthService interface {
 type VerifyAccessTokenService interface {
 	VerifyAccessToken(ctx context.Context, accessToken string) (string, int64, error)
 }
+
+type VerifyRefreshTokenService interface {
+	VerifyRefreshToken(ctx context.Context, refreshToken string) (string, int64, error)
+}

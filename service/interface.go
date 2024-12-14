@@ -22,6 +22,7 @@ type CredentialGetter interface {
 	SearchByAccessToken(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)
 	SearchByRefreshToken(ctx context.Context, db store.Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error)
 	GetAccessToken(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error)
+	GetRefreshToken(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error)
 }
 
 type CredentialSetter interface {

@@ -32,9 +32,10 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	oAuthRepo := store.NewOAuthRepository(clocker)
 	roService := service.NewRegisterOAuth(dbHandlers, oAuthRepo, oAuthRepo)
 	roHandler := handler.NewRegisterOAuth(roService, v)
+	// vrtService := service.NewVerifyRefreshToken(dbHandlers, oAuthRepo)
 	mux.Route("/messages", func(r chi.Router) {
 		r.Post("/register", roHandler.ServeHTTP)
-		// r.With(handler.VerifyRefreshTokenMiddleware()).Post("/token", fooHandler.ServeHTTP)
+		// r.With(handler.VerifyRefreshTokenMiddleware(vrtService)).Post("/token", fooHandler.ServeHTTP)
 	})
 	vatService := service.NewVerifyAccessToken(dbHandlers, oAuthRepo)
 	messageRepo := store.NewMessageRepository(clocker)

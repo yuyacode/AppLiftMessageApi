@@ -101,3 +101,12 @@ func (o *OAuthRepository) GetAccessToken(ctx context.Context, db Queryer, param 
 	}
 	return result, nil
 }
+
+func (o *OAuthRepository) GetRefreshToken(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error) {
+	query := "SELECT refresh_token FROM message_api_credentials WHERE user_id = :user_id AND deleted_at IS NULL LIMIT 1;"
+	var result *entity.MessageAPICredential
+	if err := db.GetContext(ctx, result, query, param); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
