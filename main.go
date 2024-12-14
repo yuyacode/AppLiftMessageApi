@@ -38,5 +38,6 @@ func run(ctx context.Context) error {
 			f()
 		}(f)
 	}
-	// サーバーを生成して起動する
+	s := NewServer(l, mux)
+	return s.Run(ctx)
 }
