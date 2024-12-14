@@ -63,10 +63,10 @@ func (o *OAuthRepository) GetRefreshToken(ctx context.Context, db Queryer, param
 	return result, nil
 }
 
-func (o *OAuthRepository) SearchByClientID(ctx context.Context, db Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error) {
+func (o *OAuthRepository) SearchByClientID(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (bool, error) {
 	query := "SELECT 1 FROM message_api_credentials WHERE client_id = :client_id AND deleted_at IS NULL LIMIT 1;"
 	var dummy int
-	if err := db.GetContext(ctx, &dummy, query, messageAPICredential); err != nil {
+	if err := db.GetContext(ctx, &dummy, query, param); err != nil {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
@@ -75,10 +75,10 @@ func (o *OAuthRepository) SearchByClientID(ctx context.Context, db Queryer, mess
 	return true, nil
 }
 
-func (o *OAuthRepository) SearchByClientSecret(ctx context.Context, db Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error) {
+func (o *OAuthRepository) SearchByClientSecret(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (bool, error) {
 	query := "SELECT 1 FROM message_api_credentials WHERE client_secret = :client_secret AND deleted_at IS NULL LIMIT 1;"
 	var dummy int
-	if err := db.GetContext(ctx, &dummy, query, messageAPICredential); err != nil {
+	if err := db.GetContext(ctx, &dummy, query, param); err != nil {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
@@ -87,10 +87,10 @@ func (o *OAuthRepository) SearchByClientSecret(ctx context.Context, db Queryer, 
 	return true, nil
 }
 
-func (o *OAuthRepository) SearchByAccessToken(ctx context.Context, db Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error) {
+func (o *OAuthRepository) SearchByAccessToken(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (bool, error) {
 	query := "SELECT 1 FROM message_api_credentials WHERE access_token = :access_token AND deleted_at IS NULL LIMIT 1;"
 	var dummy int
-	if err := db.GetContext(ctx, &dummy, query, messageAPICredential); err != nil {
+	if err := db.GetContext(ctx, &dummy, query, param); err != nil {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
@@ -99,10 +99,10 @@ func (o *OAuthRepository) SearchByAccessToken(ctx context.Context, db Queryer, m
 	return true, nil
 }
 
-func (o *OAuthRepository) SearchByRefreshToken(ctx context.Context, db Queryer, messageAPICredential *entity.MessageAPICredential) (bool, error) {
+func (o *OAuthRepository) SearchByRefreshToken(ctx context.Context, db Queryer, param *entity.MessageAPICredential) (bool, error) {
 	query := "SELECT 1 FROM message_api_credentials WHERE refresh_token = :refresh_token AND deleted_at IS NULL LIMIT 1;"
 	var dummy int
-	if err := db.GetContext(ctx, &dummy, query, messageAPICredential); err != nil {
+	if err := db.GetContext(ctx, &dummy, query, param); err != nil {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
@@ -111,18 +111,18 @@ func (o *OAuthRepository) SearchByRefreshToken(ctx context.Context, db Queryer, 
 	return true, nil
 }
 
-func (o *OAuthRepository) SaveClientIDSecret(ctx context.Context, db Execer, messageAPICredential *entity.MessageAPICredential) error {
+func (o *OAuthRepository) SaveClientIDSecret(ctx context.Context, db Execer, param *entity.MessageAPICredential) error {
 	query := "INSERT INTO message_api_credentials (user_id, client_id, client_secret) VALUES (:user_id, :client_id, :client_secret);"
-	_, err := db.NamedExecContext(ctx, query, messageAPICredential)
+	_, err := db.NamedExecContext(ctx, query, param)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (o *OAuthRepository) SaveToken(ctx context.Context, db Execer, messageAPICredential *entity.MessageAPICredential) error {
+func (o *OAuthRepository) SaveToken(ctx context.Context, db Execer, param *entity.MessageAPICredential) error {
 	query := "UPDATE message_api_credentials SET access_token = :access_token, refresh_token = :refresh_token, expires_at = :expires_at WHERE user_id = :user_id;"
-	_, err := db.NamedExecContext(ctx, query, messageAPICredential)
+	_, err := db.NamedExecContext(ctx, query, param)
 	if err != nil {
 		return err
 	}
