@@ -32,7 +32,7 @@ func New(ctx context.Context, cfg *config.Config, targetDB string) (*sqlx.DB, fu
 		return nil, func() {}, err
 	}
 	db, err := sql.Open("mysql", fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?parseTime=true",
+		"%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Asia%%2FTokyo",
 		cfg.DBUserName,
 		cfg.DBPassword,
 		cfg.DBHost,
