@@ -44,7 +44,8 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 			err.Error(),
 		)
 	}
-	if apiKey != validAPIKey {
+	hashedAPIKey := credential.HashAPIKey(apiKey)
+	if hashedAPIKey != validAPIKey {
 		return handler.NewServiceError(
 			http.StatusUnauthorized,
 			"API Key is invalid",
