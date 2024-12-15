@@ -30,6 +30,6 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to generate API key: %v", err)
 		}
-		fmt.Println("API Key successfully generated: %s", apiKey)
+		fmt.Printf("API Key successfully generated: %s\n", apiKey)
 	}
 }
