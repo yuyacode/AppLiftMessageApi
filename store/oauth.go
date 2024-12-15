@@ -112,7 +112,8 @@ func (or *OAuthRepository) SearchByRefreshToken(ctx context.Context, db Queryer,
 }
 
 func (or *OAuthRepository) SaveClientIDSecret(ctx context.Context, db Execer, param *entity.MessageAPICredential) error {
-	query := "INSERT INTO message_api_credentials (user_id, client_id, client_secret) VALUES (:user_id, :client_id, :client_secret);"
+	param.CreatedAt = or.Clocker.Now()
+	query := "INSERT INTO message_api_credentials (user_id, client_id, client_secret, created_at) VALUES (:user_id, :client_id, :client_secret, :created_at);"
 	_, err := db.NamedExecContext(ctx, query, param)
 	if err != nil {
 		return err
@@ -121,7 +122,8 @@ func (or *OAuthRepository) SaveClientIDSecret(ctx context.Context, db Execer, pa
 }
 
 func (or *OAuthRepository) SaveToken(ctx context.Context, db Execer, param *entity.MessageAPICredential) error {
-	query := "UPDATE message_api_credentials SET access_token = :access_token, refresh_token = :refresh_token, expires_at = :expires_at WHERE user_id = :user_id;"
+	param.UpdatedAt = or.Clocker.Now()
+	query := "UPDATE message_api_credentials SET access_token = :access_token, refresh_token = :refresh_token, expires_at = :expires_at, updated_at = :updated_at WHERE user_id = :user_id;"
 	_, err := db.NamedExecContext(ctx, query, param)
 	if err != nil {
 		return err

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 
+	"github.com/yuyacode/AppLiftMessageApi/clock"
 	"github.com/yuyacode/AppLiftMessageApi/config"
 	"github.com/yuyacode/AppLiftMessageApi/credential"
 	"github.com/yuyacode/AppLiftMessageApi/store"
@@ -31,8 +32,9 @@ func GenerateAPIKey(target string) (string, error) {
 	}
 	apiKey := hex.EncodeToString(bytes)
 	hashedAPIKey := credential.HashAPIKey(apiKey)
-	query := "INSERT INTO message_api_keys (api_key) VALUES (?);"
-	_, err = dbHandler.ExecContext(ctx, query, hashedAPIKey)
+	clocker := clock.RealClocker{}
+	query := "INSERT INTO message_api_keys (api_key, created_at) VALUES (?, ?);"
+	_, err = dbHandler.ExecContext(ctx, query, hashedAPIKey, clocker.Now())
 	if err != nil {
 		return "", err
 	}

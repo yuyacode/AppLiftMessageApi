@@ -6,9 +6,18 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/yuyacode/AppLiftMessageApi/config"
 )
+
+func init() {
+	var err error
+	time.Local, err = time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		log.Fatalf("failed to set time.Local: %v", err)
+	}
+}
 
 func main() {
 	if err := run(context.Background()); err != nil {

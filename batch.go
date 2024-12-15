@@ -6,9 +6,18 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/yuyacode/AppLiftMessageApi/batch"
 )
+
+func init() {
+	var err error
+	time.Local, err = time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		log.Fatalf("failed to set time.Local: %v", err)
+	}
+}
 
 // example: go run -tags=batch batch.go --mode=generate_api_key --target=company
 func main() {
