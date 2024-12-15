@@ -16,8 +16,6 @@ import (
 )
 
 func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]func(), error) {
-	mux := chi.NewRouter()
-	v := validator.New()
 	dbList := [3]string{"company", "student", "common"}
 	var dbHandlers = make(map[string]*sqlx.DB, len(dbList))
 	var dbCloseFuncs = make(map[string]func(), len(dbList))
@@ -28,6 +26,7 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 			return nil, dbCloseFuncs, err
 		}
 	}
+	v := validator.New()
 	clocker := clock.RealClocker{}
 	oAuthRepo := store.NewOAuthRepository(clocker)
 	roService := service.NewRegisterOAuth(dbHandlers, oAuthRepo, oAuthRepo)
@@ -35,20 +34,22 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	vrtService := service.NewVerifyRefreshToken(dbHandlers, oAuthRepo)
 	ratService := service.NewRefreshAccessToken(dbHandlers, oAuthRepo, oAuthRepo)
 	ratHandler := handler.NewRefreshAccessToken(ratService, v)
-	mux.Route("/messages", func(r chi.Router) {
-		r.Post("/register", roHandler.ServeHTTP)
-		r.With(handler.VerifyRefreshTokenMiddleware(vrtService)).Post("/token", ratHandler.ServeHTTP)
-	})
 	vatService := service.NewVerifyAccessToken(dbHandlers, oAuthRepo)
 	messageRepo := store.NewMessageRepository(clocker)
 	gmService := service.NewGetMessage(dbHandlers, messageRepo, messageRepo)
 	gmHandler := handler.NewGetMessage(gmService, v)
+	mux := chi.NewRouter()
 	mux.Route("/messages", func(r chi.Router) {
-		r.Use(handler.VerifyAccessTokenMiddleware(vatService))
-		r.Get("/", gmHandler.ServeHTTP)
-		// r.Post("/", fooHandler.ServeHTTP)
-		// r.Patch("/{id}", fooHandler.ServeHTTP)
-		// r.Delete("/{id}", fooHandler.ServeHTTP)
+		r.Post("/register", roHandler.ServeHTTP)
+		r.With(handler.VerifyRefreshTokenMiddleware(vrtService)).
+			Post("/token", ratHandler.ServeHTTP)
+		r.Group(func(r chi.Router) {
+			r.Use(handler.VerifyAccessTokenMiddleware(vatService))
+			r.Get("/", gmHandler.ServeHTTP)
+			// r.Post("/", fooHandler.ServeHTTP)
+			// r.Patch("/{id}", fooHandler.ServeHTTP)
+			// r.Delete("/{id}", fooHandler.ServeHTTP)
+		})
 	})
 	return mux, dbCloseFuncs, nil
 }
