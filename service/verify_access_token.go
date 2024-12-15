@@ -47,17 +47,8 @@ func (vat *VerifyAccessToken) VerifyAccessToken(ctx context.Context, accessToken
 			"invalid access token",
 		)
 	}
-	loc, err := time.LoadLocation("Asia/Tokyo")
-	if err != nil {
-		return "", 0, handler.NewServiceError(
-			http.StatusInternalServerError,
-			"failed to get timezone",
-			err.Error(),
-		)
-	}
-	expiresAtJST := validAccessToken.ExpiresAt.In(loc) // 本来はこの変換を不要にしたい。DBから取ってきた時点でJSTになっているか後ほど確認
-	currentTimeJST := time.Now().In(loc)
-	if currentTimeJST.After(expiresAtJST) {
+	currentTime := time.Now()
+	if currentTime.After(validAccessToken.ExpiresAt) {
 		return "", 0, handler.NewServiceError(
 			http.StatusUnauthorized,
 			"token_expired",
