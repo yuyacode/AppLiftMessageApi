@@ -137,8 +137,10 @@ func DecryptAccessToken(accessToken string) (string, int64, error) {
 }
 
 func getAccessTokenSecretKey() ([]byte, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, err
+	if err := godotenv.Load("../.env"); err != nil {
+		if os.Getenv("ENV") == "dev" {
+			return nil, err
+		}
 	}
 	secretKeyBase64 := os.Getenv("ACCESS_TOKEN_SECRET_KEY")
 	if secretKeyBase64 == "" {
