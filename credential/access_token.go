@@ -146,5 +146,9 @@ func getAccessTokenSecretKey() ([]byte, error) {
 	if secretKeyBase64 == "" {
 		return nil, fmt.Errorf("ACCESS_TOKEN_SECRET_KEY environment variable not set")
 	}
-	return base64.StdEncoding.DecodeString(secretKeyBase64)
+	secretKey, err := base64.StdEncoding.DecodeString(secretKeyBase64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode access token secret key: %w", err)
+	}
+	return secretKey, nil
 }
