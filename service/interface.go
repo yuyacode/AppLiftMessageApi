@@ -30,5 +30,5 @@ type MessageGetter interface {
 }
 
 type MessageOwnerGetter interface {
-	GetThreadCompanyOwner(ctx context.Context, db store.Queryer, param *entity.MessageThread) (int64, error)
+	GetThreadCompanyOwner(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (int64, error)
 }

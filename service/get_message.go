@@ -26,8 +26,7 @@ func NewGetMessage(dbHandlers map[string]*sqlx.DB, messageGetter MessageGetter, 
 }
 
 func (gm *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
-	messageThread := &entity.MessageThread{ID: messageThreadID}
-	companyUserID, err := gm.MessageOwnerGetter.GetThreadCompanyOwner(ctx, gm.DBHandlers["common"], messageThread)
+	companyUserID, err := gm.MessageOwnerGetter.GetThreadCompanyOwner(ctx, gm.DBHandlers["common"], messageThreadID)
 	if err != nil {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,

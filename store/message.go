@@ -43,10 +43,10 @@ func (mr *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, thr
 	return messages, nil
 }
 
-func (mr *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Queryer, param *entity.MessageThread) (int64, error) {
-	query := "SELECT company_user_id FROM message_threads WHERE id = :id AND deleted_at IS NULL;"
+func (mr *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (int64, error) {
+	query := "SELECT company_user_id FROM message_threads WHERE id = ? AND deleted_at IS NULL;"
 	var companyUserID int64
-	if err := db.GetContext(ctx, &companyUserID, query, param); err != nil {
+	if err := db.GetContext(ctx, &companyUserID, query, messageThreadID); err != nil {
 		return 0, err
 	}
 	return companyUserID, nil
