@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 	"github.com/yuyacode/AppLiftMessageApi/store"
@@ -9,14 +10,14 @@ import (
 
 type CredentialGetter interface {
 	GetAPIKey(ctx context.Context, db store.Queryer) (string, error)
-	GetClientID(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (string, error)
-	GetClientSecret(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (string, error)
-	GetAccessToken(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error)
-	GetRefreshToken(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (*entity.MessageAPICredential, error)
-	SearchByClientID(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (bool, error)
-	SearchByClientSecret(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (bool, error)
-	SearchByAccessToken(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (bool, error)
-	SearchByRefreshToken(ctx context.Context, db store.Queryer, param *entity.MessageAPICredential) (bool, error)
+	GetClientID(ctx context.Context, db store.Queryer, userID int64) (string, error)
+	GetClientSecret(ctx context.Context, db store.Queryer, userID int64) (string, error)
+	GetAccessToken(ctx context.Context, db store.Queryer, userID int64) (string, time.Time, error)
+	GetRefreshToken(ctx context.Context, db store.Queryer, userID int64) (string, error)
+	SearchByClientID(ctx context.Context, db store.Queryer, clientID string) (bool, error)
+	SearchByClientSecret(ctx context.Context, db store.Queryer, clientSecret string) (bool, error)
+	SearchByAccessToken(ctx context.Context, db store.Queryer, accessToken string) (bool, error)
+	SearchByRefreshToken(ctx context.Context, db store.Queryer, refreshToken string) (bool, error)
 }
 
 type CredentialSetter interface {

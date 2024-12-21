@@ -8,7 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/yuyacode/AppLiftMessageApi/credential"
-	"github.com/yuyacode/AppLiftMessageApi/entity"
 	"github.com/yuyacode/AppLiftMessageApi/handler"
 )
 
@@ -29,10 +28,7 @@ func (vat *VerifyAccessToken) VerifyAccessToken(ctx context.Context, accessToken
 	if err != nil {
 		return "", 0, err
 	}
-	param := &entity.MessageAPICredential{
-		UserID: userID,
-	}
-	validAccessToken, err := vat.CredentialGetter.GetAccessToken(ctx, vat.DBHandlers[appKind], param)
+	validAccessToken, expiresAt, err := vat.CredentialGetter.GetAccessToken(ctx, vat.DBHandlers[appKind], userID)
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
@@ -40,7 +36,7 @@ func (vat *VerifyAccessToken) VerifyAccessToken(ctx context.Context, accessToken
 			err.Error(),
 		)
 	}
-	if accessToken != validAccessToken.AccessToken {
+	if accessToken != validAccessToken {
 		return "", 0, handler.NewServiceError(
 			http.StatusUnauthorized,
 			"invalid_token",
@@ -48,7 +44,7 @@ func (vat *VerifyAccessToken) VerifyAccessToken(ctx context.Context, accessToken
 		)
 	}
 	currentTime := time.Now()
-	if currentTime.After(validAccessToken.ExpiresAt) {
+	if currentTime.After(expiresAt) {
 		return "", 0, handler.NewServiceError(
 			http.StatusUnauthorized,
 			"token_expired",

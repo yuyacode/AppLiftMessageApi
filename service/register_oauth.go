@@ -52,9 +52,10 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 			"",
 		)
 	}
-	messageAPICredential := &entity.MessageAPICredential{}
+	var clientID string
 	for i := 0; i < 5; i++ {
-		clientID, err := credential.GenerateClientID()
+		var err error
+		clientID, err = credential.GenerateClientID()
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -62,8 +63,7 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 				err.Error(),
 			)
 		}
-		messageAPICredential.ClientID = clientID
-		exist, err := ro.CredentialGetter.SearchByClientID(ctx, ro.DBHandlers[appKind], messageAPICredential)
+		exist, err := ro.CredentialGetter.SearchByClientID(ctx, ro.DBHandlers[appKind], clientID)
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -82,8 +82,10 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 			)
 		}
 	}
+	var clientSecret string
 	for i := 0; i < 5; i++ {
-		clientSecret, err := credential.GenerateClientSecret()
+		var err error
+		clientSecret, err = credential.GenerateClientSecret()
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -91,8 +93,7 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 				err.Error(),
 			)
 		}
-		messageAPICredential.ClientSecret = clientSecret
-		exist, err := ro.CredentialGetter.SearchByClientSecret(ctx, ro.DBHandlers[appKind], messageAPICredential)
+		exist, err := ro.CredentialGetter.SearchByClientSecret(ctx, ro.DBHandlers[appKind], clientSecret)
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -119,8 +120,12 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 			"",
 		)
 	}
-	messageAPICredential.UserID = userID
-	err = ro.CredentialSetter.SaveClientIDSecret(ctx, ro.DBHandlers[appKind], messageAPICredential)
+	param := &entity.MessageAPICredential{
+		UserID:       userID,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+	}
+	err = ro.CredentialSetter.SaveClientIDSecret(ctx, ro.DBHandlers[appKind], param)
 	if err != nil {
 		return handler.NewServiceError(
 			http.StatusInternalServerError,
@@ -128,8 +133,10 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 			err.Error(),
 		)
 	}
+	var accessToken string
 	for i := 0; i < 5; i++ {
-		access_token, err := credential.GenerateAccessToken(appKind, userID)
+		var err error
+		accessToken, err = credential.GenerateAccessToken(appKind, userID)
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -137,8 +144,7 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 				err.Error(),
 			)
 		}
-		messageAPICredential.AccessToken = access_token
-		exist, err := ro.CredentialGetter.SearchByAccessToken(ctx, ro.DBHandlers[appKind], messageAPICredential)
+		exist, err := ro.CredentialGetter.SearchByAccessToken(ctx, ro.DBHandlers[appKind], accessToken)
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -157,8 +163,10 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 			)
 		}
 	}
+	var refreshToken string
 	for i := 0; i < 5; i++ {
-		refresh_token, err := credential.GenerateRefreshToken(appKind, userID)
+		var err error
+		refreshToken, err = credential.GenerateRefreshToken(appKind, userID)
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -166,8 +174,7 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 				err.Error(),
 			)
 		}
-		messageAPICredential.RefreshToken = refresh_token
-		exist, err := ro.CredentialGetter.SearchByRefreshToken(ctx, ro.DBHandlers[appKind], messageAPICredential)
+		exist, err := ro.CredentialGetter.SearchByRefreshToken(ctx, ro.DBHandlers[appKind], refreshToken)
 		if err != nil {
 			return handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -186,8 +193,10 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 			)
 		}
 	}
-	messageAPICredential.ExpiresAt = time.Now().Add(15 * time.Minute)
-	err = ro.CredentialSetter.SaveToken(ctx, ro.DBHandlers[appKind], messageAPICredential)
+	param.AccessToken = accessToken
+	param.RefreshToken = refreshToken
+	param.ExpiresAt = time.Now().Add(15 * time.Minute)
+	err = ro.CredentialSetter.SaveToken(ctx, ro.DBHandlers[appKind], param)
 	if err != nil {
 		return handler.NewServiceError(
 			http.StatusInternalServerError,

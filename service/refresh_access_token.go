@@ -44,10 +44,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 			"",
 		)
 	}
-	param := &entity.MessageAPICredential{
-		UserID: userID,
-	}
-	validClientID, err := rat.CredentialGetter.GetClientID(ctx, rat.DBHandlers[appKind], param)
+	validClientID, err := rat.CredentialGetter.GetClientID(ctx, rat.DBHandlers[appKind], userID)
 	if err != nil {
 		return "", handler.NewServiceError(
 			http.StatusInternalServerError,
@@ -62,7 +59,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 			"",
 		)
 	}
-	validClientSecret, err := rat.CredentialGetter.GetClientSecret(ctx, rat.DBHandlers[appKind], param)
+	validClientSecret, err := rat.CredentialGetter.GetClientSecret(ctx, rat.DBHandlers[appKind], userID)
 	if err != nil {
 		return "", handler.NewServiceError(
 			http.StatusInternalServerError,
@@ -77,8 +74,10 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 			"",
 		)
 	}
+	var accessToken string
 	for i := 0; i < 5; i++ {
-		access_token, err := credential.GenerateAccessToken(appKind, userID)
+		var err error
+		accessToken, err = credential.GenerateAccessToken(appKind, userID)
 		if err != nil {
 			return "", handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -86,8 +85,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 				err.Error(),
 			)
 		}
-		param.AccessToken = access_token
-		exist, err := rat.CredentialGetter.SearchByAccessToken(ctx, rat.DBHandlers[appKind], param)
+		exist, err := rat.CredentialGetter.SearchByAccessToken(ctx, rat.DBHandlers[appKind], accessToken)
 		if err != nil {
 			return "", handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -106,8 +104,10 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 			)
 		}
 	}
+	var refreshToken string
 	for i := 0; i < 5; i++ {
-		refresh_token, err := credential.GenerateRefreshToken(appKind, userID)
+		var err error
+		refreshToken, err = credential.GenerateRefreshToken(appKind, userID)
 		if err != nil {
 			return "", handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -115,8 +115,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 				err.Error(),
 			)
 		}
-		param.RefreshToken = refresh_token
-		exist, err := rat.CredentialGetter.SearchByRefreshToken(ctx, rat.DBHandlers[appKind], param)
+		exist, err := rat.CredentialGetter.SearchByRefreshToken(ctx, rat.DBHandlers[appKind], refreshToken)
 		if err != nil {
 			return "", handler.NewServiceError(
 				http.StatusInternalServerError,
@@ -135,7 +134,13 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 			)
 		}
 	}
-	param.ExpiresAt = time.Now().Add(15 * time.Minute)
+	expiresAt := time.Now().Add(15 * time.Minute)
+	param := &entity.MessageAPICredential{
+		UserID:       userID,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresAt:    expiresAt,
+	}
 	err = rat.CredentialSetter.SaveToken(ctx, rat.DBHandlers[appKind], param)
 	if err != nil {
 		return "", handler.NewServiceError(

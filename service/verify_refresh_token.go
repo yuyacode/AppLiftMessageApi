@@ -7,7 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/yuyacode/AppLiftMessageApi/credential"
-	"github.com/yuyacode/AppLiftMessageApi/entity"
 	"github.com/yuyacode/AppLiftMessageApi/handler"
 )
 
@@ -28,10 +27,7 @@ func (vrt *VerifyRefreshToken) VerifyRefreshToken(ctx context.Context, refreshTo
 	if err != nil {
 		return "", 0, err
 	}
-	param := &entity.MessageAPICredential{
-		UserID: userID,
-	}
-	validRefreshToken, err := vrt.CredentialGetter.GetRefreshToken(ctx, vrt.DBHandlers[appKind], param)
+	validRefreshToken, err := vrt.CredentialGetter.GetRefreshToken(ctx, vrt.DBHandlers[appKind], userID)
 	if err != nil {
 		return "", 0, handler.NewServiceError(
 			http.StatusInternalServerError,
@@ -39,7 +35,7 @@ func (vrt *VerifyRefreshToken) VerifyRefreshToken(ctx context.Context, refreshTo
 			err.Error(),
 		)
 	}
-	if refreshToken != validRefreshToken.RefreshToken {
+	if refreshToken != validRefreshToken {
 		return "", 0, handler.NewServiceError(
 			http.StatusUnauthorized,
 			"invalid_token",
