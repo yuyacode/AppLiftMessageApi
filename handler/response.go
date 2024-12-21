@@ -54,7 +54,7 @@ func RespondJSON(ctx context.Context, w http.ResponseWriter, body any, status in
 }
 
 func getAllowedOrigin() (string, error) {
-	if err := godotenv.Load("../.env"); err != nil {
+	if err := godotenv.Load(); err != nil {
 		if os.Getenv("ENV") == "dev" {
 			return "", err
 		}
