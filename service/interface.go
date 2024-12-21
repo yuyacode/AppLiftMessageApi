@@ -26,7 +26,7 @@ type CredentialSetter interface {
 }
 
 type MessageGetter interface {
-	GetAllMessages(ctx context.Context, db store.Queryer, threadID entity.MessageThreadID) (entity.Messages, error)
+	GetAllMessages(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error)
 }
 
 type MessageOwnerGetter interface {
