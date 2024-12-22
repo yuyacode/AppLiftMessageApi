@@ -27,10 +27,10 @@ func NewRefreshAccessToken(dbHandlers map[string]*sqlx.DB, credentialGetter Cred
 	}
 }
 
-func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id, client_secret string) (string, error) {
+func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id, client_secret string) (string, string, error) {
 	appKind, ok := request.GetAppKind(ctx)
 	if !ok {
-		return "", handler.NewServiceError(
+		return "", "", handler.NewServiceError(
 			http.StatusInternalServerError,
 			"failed to get app kind",
 			"",
@@ -38,7 +38,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 	}
 	userID, ok := request.GetUserID(ctx)
 	if !ok {
-		return "", handler.NewServiceError(
+		return "", "", handler.NewServiceError(
 			http.StatusInternalServerError,
 			"failed to get user_id",
 			"",
@@ -46,14 +46,14 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 	}
 	validClientID, err := rat.CredentialGetter.GetClientID(ctx, rat.DBHandlers[appKind], userID)
 	if err != nil {
-		return "", handler.NewServiceError(
+		return "", "", handler.NewServiceError(
 			http.StatusInternalServerError,
 			"failed to get client_id",
 			err.Error(),
 		)
 	}
 	if client_id != validClientID {
-		return "", handler.NewServiceError(
+		return "", "", handler.NewServiceError(
 			http.StatusUnauthorized,
 			"client_id is invalid",
 			"",
@@ -61,14 +61,14 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 	}
 	validClientSecret, err := rat.CredentialGetter.GetClientSecret(ctx, rat.DBHandlers[appKind], userID)
 	if err != nil {
-		return "", handler.NewServiceError(
+		return "", "", handler.NewServiceError(
 			http.StatusInternalServerError,
 			"failed to get client_secret",
 			err.Error(),
 		)
 	}
 	if client_secret != validClientSecret {
-		return "", handler.NewServiceError(
+		return "", "", handler.NewServiceError(
 			http.StatusUnauthorized,
 			"client_secret is invalid",
 			"",
@@ -79,7 +79,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 		var err error
 		accessToken, err = credential.GenerateAccessToken(appKind, userID)
 		if err != nil {
-			return "", handler.NewServiceError(
+			return "", "", handler.NewServiceError(
 				http.StatusInternalServerError,
 				"failed to generate access_token",
 				err.Error(),
@@ -87,7 +87,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 		}
 		exist, err := rat.CredentialGetter.SearchByAccessToken(ctx, rat.DBHandlers[appKind], accessToken)
 		if err != nil {
-			return "", handler.NewServiceError(
+			return "", "", handler.NewServiceError(
 				http.StatusInternalServerError,
 				"failed to search access_token",
 				err.Error(),
@@ -97,7 +97,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 			break
 		}
 		if i == 4 {
-			return "", handler.NewServiceError(
+			return "", "", handler.NewServiceError(
 				http.StatusInternalServerError,
 				"failed to generate access_token 5 times",
 				"",
@@ -109,7 +109,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 		var err error
 		refreshToken, err = credential.GenerateRefreshToken(appKind, userID)
 		if err != nil {
-			return "", handler.NewServiceError(
+			return "", "", handler.NewServiceError(
 				http.StatusInternalServerError,
 				"failed to generate refresh_token",
 				err.Error(),
@@ -117,7 +117,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 		}
 		exist, err := rat.CredentialGetter.SearchByRefreshToken(ctx, rat.DBHandlers[appKind], refreshToken)
 		if err != nil {
-			return "", handler.NewServiceError(
+			return "", "", handler.NewServiceError(
 				http.StatusInternalServerError,
 				"failed to search refresh_token",
 				err.Error(),
@@ -127,7 +127,7 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 			break
 		}
 		if i == 4 {
-			return "", handler.NewServiceError(
+			return "", "", handler.NewServiceError(
 				http.StatusInternalServerError,
 				"failed to generate refresh_token 5 times",
 				"",
@@ -143,11 +143,11 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 	}
 	err = rat.CredentialSetter.SaveToken(ctx, rat.DBHandlers[appKind], param)
 	if err != nil {
-		return "", handler.NewServiceError(
+		return "", "", handler.NewServiceError(
 			http.StatusInternalServerError,
 			"failed to save token",
 			err.Error(),
 		)
 	}
-	return param.AccessToken, nil
+	return accessToken, refreshToken, nil
 }

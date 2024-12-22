@@ -19,7 +19,7 @@ type RegisterOAuthService interface {
 }
 
 type RefreshAccessTokenService interface {
-	RefreshAccessToken(ctx context.Context, client_id, client_secret string) (string, error)
+	RefreshAccessToken(ctx context.Context, client_id, client_secret string) (string, string, error)
 }
 
 type GetMessageService interface {

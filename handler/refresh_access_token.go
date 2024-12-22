@@ -37,7 +37,7 @@ func (rat *RefreshAccessToken) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		}, http.StatusUnauthorized)
 		return
 	}
-	accessToken, err := rat.Service.RefreshAccessToken(ctx, requestData.ClientID, requestData.ClientSecret)
+	accessToken, refreshToken, err := rat.Service.RefreshAccessToken(ctx, requestData.ClientID, requestData.ClientSecret)
 	if err != nil {
 		if serviceErr, ok := err.(*ServiceError); ok {
 			RespondJSON(ctx, w, &ErrResponse{
@@ -52,9 +52,11 @@ func (rat *RefreshAccessToken) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	rsp := struct {
-		AccessToken string `json:"access_token"`
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
 	}{
-		AccessToken: accessToken,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 	RespondJSON(ctx, w, &rsp, http.StatusOK)
 }
