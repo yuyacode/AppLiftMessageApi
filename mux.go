@@ -41,8 +41,10 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	mux := chi.NewRouter()
 	mux.Route("/messages", func(r chi.Router) {
 		r.Post("/register", roHandler.ServeHTTP)
-		r.With(handler.VerifyRefreshTokenMiddleware(vrtService)).
-			Post("/token", ratHandler.ServeHTTP)
+		r.Group(func(r chi.Router) {
+			r.Use(handler.VerifyRefreshTokenMiddleware(vrtService))
+			r.Post("/token", ratHandler.ServeHTTP)
+		})
 		r.Group(func(r chi.Router) {
 			r.Use(handler.CORSMiddleware(), handler.VerifyAccessTokenMiddleware(vatService))
 			r.Get("/", gmHandler.ServeHTTP)
