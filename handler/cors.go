@@ -13,12 +13,12 @@ import (
 func CORSMiddleware() func(http.Handler) http.Handler {
 	allowedOrigin, err := getAllowedOrigin()
 	if err != nil {
-		log.Printf("failed to fetch allowed origin: %v", err)
+		log.Printf("failed to get allowed origin: %v", err)
 		allowedOrigin = "*" // フォールバックとして全オリジンを許可
 	}
 	return cors.Handler(cors.Options{
 		AllowedOrigins: []string{allowedOrigin},
-		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowedMethods: []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type"},
 		MaxAge:         300,
 	})
