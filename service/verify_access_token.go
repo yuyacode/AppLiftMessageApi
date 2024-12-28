@@ -36,6 +36,13 @@ func (vat *VerifyAccessToken) VerifyAccessToken(ctx context.Context, accessToken
 			err.Error(),
 		)
 	}
+	if expiresAt == nil || !expiresAt.Valid {
+		return "", 0, handler.NewServiceError(
+			http.StatusInternalServerError,
+			"the expiresAt is not set.",
+			"the access token expiration date is invalid",
+		)
+	}
 	if accessToken != validAccessToken {
 		return "", 0, handler.NewServiceError(
 			http.StatusUnauthorized,
@@ -44,7 +51,7 @@ func (vat *VerifyAccessToken) VerifyAccessToken(ctx context.Context, accessToken
 		)
 	}
 	currentTime := time.Now()
-	if currentTime.After(expiresAt) {
+	if currentTime.After(expiresAt.Time) {
 		return "", 0, handler.NewServiceError(
 			http.StatusUnauthorized,
 			"token_expired",

@@ -1,8 +1,6 @@
 package entity
 
-import (
-	"time"
-)
+import "database/sql"
 
 type MessageID int64
 
@@ -13,9 +11,9 @@ type Message struct {
 	IsFromStudent   int8            `json:"is_from_student"   db:"is_from_student"`
 	Content         string          `json:"content"           db:"content"`
 	IsUnread        string          `json:"is_unread"         db:"is_unread"`
-	CreatedAt       time.Time       `json:"created_at"        db:"created_at"`
-	UpdatedAt       time.Time       `json:"updated_at"        db:"updated_at"`
-	DeletedAt       time.Time       `json:"deleted_at"        db:"deleted_at"`
+	CreatedAt       *sql.NullTime   `json:"created_at"        db:"created_at"`
+	UpdatedAt       *sql.NullTime   `json:"updated_at"        db:"updated_at"`
+	DeletedAt       *sql.NullTime   `json:"deleted_at"        db:"deleted_at"`
 }
 
 type Messages []*Message

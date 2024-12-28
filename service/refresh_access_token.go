@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -134,7 +135,10 @@ func (rat *RefreshAccessToken) RefreshAccessToken(ctx context.Context, client_id
 			)
 		}
 	}
-	expiresAt := time.Now().Add(15 * time.Minute)
+	expiresAt := &sql.NullTime{
+		Time:  time.Now().Add(15 * time.Minute),
+		Valid: true,
+	}
 	param := &entity.MessageAPICredential{
 		UserID:       userID,
 		AccessToken:  accessToken,

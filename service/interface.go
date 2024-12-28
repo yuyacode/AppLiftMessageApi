@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"time"
+	"database/sql"
 
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 	"github.com/yuyacode/AppLiftMessageApi/store"
@@ -12,7 +12,7 @@ type CredentialGetter interface {
 	GetAPIKey(ctx context.Context, db store.Queryer) (string, error)
 	GetClientID(ctx context.Context, db store.Queryer, userID int64) (string, error)
 	GetClientSecret(ctx context.Context, db store.Queryer, userID int64) (string, error)
-	GetAccessToken(ctx context.Context, db store.Queryer, userID int64) (string, time.Time, error)
+	GetAccessToken(ctx context.Context, db store.Queryer, userID int64) (string, *sql.NullTime, error)
 	GetRefreshToken(ctx context.Context, db store.Queryer, userID int64) (string, error)
 	SearchByClientID(ctx context.Context, db store.Queryer, clientID string) (bool, error)
 	SearchByClientSecret(ctx context.Context, db store.Queryer, clientSecret string) (bool, error)

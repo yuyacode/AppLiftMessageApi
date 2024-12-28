@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/yuyacode/AppLiftMessageApi/clock"
 	"github.com/yuyacode/AppLiftMessageApi/entity"
@@ -46,12 +45,12 @@ func (or *OAuthRepository) GetClientSecret(ctx context.Context, db Queryer, user
 	return clientSecret, nil
 }
 
-func (or *OAuthRepository) GetAccessToken(ctx context.Context, db Queryer, userID int64) (string, time.Time, error) {
+func (or *OAuthRepository) GetAccessToken(ctx context.Context, db Queryer, userID int64) (string, *sql.NullTime, error) {
 	query := "SELECT access_token, expires_at FROM message_api_credentials WHERE user_id = ? AND deleted_at IS NULL LIMIT 1;"
 	var accessToken string
-	var expiresAt time.Time
+	var expiresAt *sql.NullTime
 	if err := db.QueryRowxContext(ctx, query, userID).Scan(&accessToken, &expiresAt); err != nil {
-		return "", time.Time{}, err
+		return "", &sql.NullTime{}, err
 	}
 	return accessToken, expiresAt, nil
 }

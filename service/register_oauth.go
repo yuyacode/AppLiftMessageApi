@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -195,7 +196,10 @@ func (ro *RegisterOAuth) RegisterOAuth(ctx context.Context, apiKey string) error
 	}
 	param.AccessToken = accessToken
 	param.RefreshToken = refreshToken
-	param.ExpiresAt = time.Now().Add(15 * time.Minute)
+	param.ExpiresAt = &sql.NullTime{
+		Time:  time.Now().Add(15 * time.Minute),
+		Valid: true,
+	}
 	err = ro.CredentialSetter.SaveToken(ctx, ro.DBHandlers[appKind], param)
 	if err != nil {
 		return handler.NewServiceError(

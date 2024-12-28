@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 
@@ -21,8 +21,8 @@ type message struct {
 	IsFromStudent int8             `json:"is_from_student" db:"is_from_student"`
 	Content       string           `json:"content"         db:"content"`
 	IsUnread      string           `json:"is_unread"       db:"is_unread"`
-	CreatedAt     time.Time        `json:"created_at"      db:"created_at"`
-	UpdatedAt     time.Time        `json:"updated_at"      db:"updated_at"`
+	CreatedAt     *sql.NullTime    `json:"created_at"      db:"created_at"`
+	UpdatedAt     *sql.NullTime    `json:"updated_at"      db:"updated_at"`
 }
 
 func NewGetMessage(service GetMessageService, validator *validator.Validate) *GetMessage {

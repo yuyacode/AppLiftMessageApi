@@ -1,22 +1,29 @@
 package clock
 
 import (
+	"database/sql"
 	"time"
 )
 
 type Clocker interface {
-	Now() time.Time
+	Now() *sql.NullTime
 }
 
 type RealClocker struct{}
 
-func (rc RealClocker) Now() time.Time {
-	return time.Now()
+func (rc RealClocker) Now() *sql.NullTime {
+	return &sql.NullTime{
+		Time:  time.Now(),
+		Valid: true,
+	}
 }
 
 type FixedClocker struct{}
 
-func (fc FixedClocker) Now() time.Time {
+func (fc FixedClocker) Now() *sql.NullTime {
 	jst := time.FixedZone("JST", 9*60*60)
-	return time.Date(2024, 7, 20, 12, 33, 56, 0, jst)
+	return &sql.NullTime{
+		Time:  time.Date(2024, 7, 20, 12, 33, 56, 0, jst),
+		Valid: true,
+	}
 }
