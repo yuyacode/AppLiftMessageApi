@@ -10,7 +10,7 @@ type Message struct {
 	IsFromCompany   int8            `json:"is_from_company"   db:"is_from_company"`
 	IsFromStudent   int8            `json:"is_from_student"   db:"is_from_student"`
 	Content         string          `json:"content"           db:"content"`
-	IsUnread        string          `json:"is_unread"         db:"is_unread"`
+	IsUnread        int8            `json:"is_unread"         db:"is_unread"`
 	CreatedAt       *sql.NullTime   `json:"created_at"        db:"created_at"`
 	UpdatedAt       *sql.NullTime   `json:"updated_at"        db:"updated_at"`
 	DeletedAt       *sql.NullTime   `json:"deleted_at"        db:"deleted_at"`
