@@ -22,7 +22,7 @@ func (mr *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, mes
         SELECT *
         FROM messages
         WHERE message_thread_id = ? AND deleted_at IS NULL
-		ORDER BY id ASC;
+		ORDER BY sent_at ASC, id ASC;
     `
 	rows, err := db.QueryxContext(ctx, query, messageThreadID)
 	if err != nil {
