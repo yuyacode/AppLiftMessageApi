@@ -20,7 +20,6 @@ type message struct {
 	IsFromCompany int8             `json:"is_from_company" db:"is_from_company"`
 	IsFromStudent int8             `json:"is_from_student" db:"is_from_student"`
 	Content       string           `json:"content"         db:"content"`
-	IsUnread      int8             `json:"is_unread"       db:"is_unread"`
 	IsSent        int8             `json:"is_sent"         db:"is_sent"`
 	SentAt        *sql.NullTime    `json:"sent_at"         db:"sent_at"`
 	CreatedAt     *sql.NullTime    `json:"created_at"      db:"created_at"`
@@ -81,7 +80,6 @@ func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			IsFromCompany: m.IsFromCompany,
 			IsFromStudent: m.IsFromStudent,
 			Content:       m.Content,
-			IsUnread:      m.IsUnread,
 			IsSent:        m.IsSent,
 			SentAt:        m.SentAt,
 			CreatedAt:     m.CreatedAt,
