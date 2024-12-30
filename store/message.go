@@ -19,7 +19,7 @@ func NewMessageRepository(clocker clock.Clocker) *MessageRepository {
 
 func (mr *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 	query := `
-        SELECT *
+        SELECT id, is_from_company, is_from_student, content, is_sent, sent_at
         FROM messages
         WHERE message_thread_id = ? AND deleted_at IS NULL
 		ORDER BY sent_at ASC, id ASC;

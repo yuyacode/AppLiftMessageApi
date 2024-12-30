@@ -22,8 +22,6 @@ type message struct {
 	Content       string           `json:"content"         db:"content"`
 	IsSent        int8             `json:"is_sent"         db:"is_sent"`
 	SentAt        *sql.NullTime    `json:"sent_at"         db:"sent_at"`
-	CreatedAt     *sql.NullTime    `json:"created_at"      db:"created_at"`
-	UpdatedAt     *sql.NullTime    `json:"updated_at"      db:"updated_at"`
 }
 
 func NewGetMessage(service GetMessageService, validator *validator.Validate) *GetMessage {
@@ -82,8 +80,6 @@ func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Content:       m.Content,
 			IsSent:        m.IsSent,
 			SentAt:        m.SentAt,
-			CreatedAt:     m.CreatedAt,
-			UpdatedAt:     m.UpdatedAt,
 		})
 	}
 	RespondJSON(ctx, w, rsp, http.StatusOK)
