@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"database/sql"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 
@@ -21,7 +21,7 @@ type message struct {
 	IsFromStudent int8             `json:"is_from_student" db:"is_from_student"`
 	Content       string           `json:"content"         db:"content"`
 	IsSent        int8             `json:"is_sent"         db:"is_sent"`
-	SentAt        *sql.NullTime    `json:"sent_at"         db:"sent_at"`
+	SentAt        time.Time        `json:"sent_at"         db:"sent_at"`
 }
 
 func NewGetMessage(service GetMessageService, validator *validator.Validate) *GetMessage {
@@ -34,7 +34,7 @@ func NewGetMessage(service GetMessageService, validator *validator.Validate) *Ge
 func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var qp struct {
-		MessageThreadID entity.MessageThreadID `validate:"required"`
+		MessageThreadID entity.MessageThreadID `validate:"required,numeric"`
 	}
 	threadIDStr := r.URL.Query().Get("thread_id")
 	if threadIDStr == "" {
@@ -82,5 +82,5 @@ func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			SentAt:        m.SentAt,
 		})
 	}
-	RespondJSON(ctx, w, rsp, http.StatusOK)
+	RespondJSON(ctx, w, &rsp, http.StatusOK)
 }

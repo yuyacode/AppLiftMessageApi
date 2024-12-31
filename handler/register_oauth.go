@@ -25,7 +25,7 @@ func (ro *RegisterOAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var requestData struct {
 		APIKey  string `                validate:"required"`
-		UserID  int64  `json:"user_id"  validate:"required"`
+		UserID  int64  `json:"user_id"  validate:"required,numeric"`
 		AppKind string `json:"app_kind" validate:"required,oneof=company student"`
 	}
 	apiKey, err := extractAuthorizationHeader(r)
