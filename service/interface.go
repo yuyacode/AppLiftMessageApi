@@ -25,10 +25,14 @@ type CredentialSetter interface {
 	SaveToken(ctx context.Context, db store.Execer, param *entity.MessageAPICredential) error
 }
 
+type MessageOwnerGetter interface {
+	GetThreadCompanyOwner(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (int64, error)
+}
+
 type MessageGetter interface {
 	GetAllMessages(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error)
 }
 
-type MessageOwnerGetter interface {
-	GetThreadCompanyOwner(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (int64, error)
+type MessageAdder interface {
+	AddMessage(ctx context.Context, db store.Execer, param *entity.Message) error
 }

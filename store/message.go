@@ -17,6 +17,15 @@ func NewMessageRepository(clocker clock.Clocker) *MessageRepository {
 	}
 }
 
+func (mr *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (int64, error) {
+	query := "SELECT company_user_id FROM message_threads WHERE id = ? AND deleted_at IS NULL;"
+	var companyUserID int64
+	if err := db.GetContext(ctx, &companyUserID, query, messageThreadID); err != nil {
+		return 0, err
+	}
+	return companyUserID, nil
+}
+
 func (mr *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 	query := `
         SELECT id, is_from_company, is_from_student, content, is_sent, sent_at
@@ -43,11 +52,17 @@ func (mr *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, mes
 	return messages, nil
 }
 
-func (mr *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (int64, error) {
-	query := "SELECT company_user_id FROM message_threads WHERE id = ? AND deleted_at IS NULL;"
-	var companyUserID int64
-	if err := db.GetContext(ctx, &companyUserID, query, messageThreadID); err != nil {
-		return 0, err
+func (mr *MessageRepository) AddMessage(ctx context.Context, db Execer, param *entity.Message) error {
+	param.CreatedAt = mr.Clocker.Now()
+	query := "INSERT INTO messages (message_thread_id, is_from_company, is_from_student, content, is_sent, sent_at, created_at) VALUES (:message_thread_id, :is_from_company, :is_from_student, :content, :is_sent, :sent_at, :created_at);"
+	result, err := db.NamedExecContext(ctx, query, param)
+	if err != nil {
+		return err
 	}
-	return companyUserID, nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	param.ID = entity.MessageID(id)
+	return nil
 }

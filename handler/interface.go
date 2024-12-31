@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"time"
 
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 )
@@ -24,4 +25,8 @@ type RefreshAccessTokenService interface {
 
 type GetMessageService interface {
 	GetAllMessages(ctx context.Context, messageThreadID entity.MessageThreadID) (entity.Messages, error)
+}
+
+type AddMessageService interface {
+	AddMessage(ctx context.Context, messageThreadID entity.MessageThreadID, isFromCompany int8, isFromStudent int8, content string, isSent int8, sentAt time.Time) (*entity.Message, error)
 }
