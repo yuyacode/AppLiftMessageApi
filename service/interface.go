@@ -27,6 +27,7 @@ type CredentialSetter interface {
 
 type MessageOwnerGetter interface {
 	GetThreadCompanyOwner(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (int64, error)
+	GetThreadCompanyOwnerByMessageID(ctx context.Context, db store.Queryer, messageID entity.MessageID) (int64, error)
 }
 
 type MessageGetter interface {
@@ -35,4 +36,8 @@ type MessageGetter interface {
 
 type MessageAdder interface {
 	AddMessage(ctx context.Context, db store.Execer, param *entity.Message) error
+}
+
+type MessageEditor interface {
+	EditMessage(ctx context.Context, db store.Execer, param *entity.Message) error
 }

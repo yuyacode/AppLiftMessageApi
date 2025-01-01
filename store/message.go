@@ -26,6 +26,21 @@ func (mr *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Query
 	return companyUserID, nil
 }
 
+func (mr *MessageRepository) GetThreadCompanyOwnerByMessageID(ctx context.Context, db Queryer, messageID entity.MessageID) (int64, error) {
+	query := `
+		SELECT company_user_id
+		FROM message_threads
+		INNER JOIN messages
+		ON message_threads.id = messages.message_thread_id
+		WHERE messages.id = ?;
+	`
+	var companyUserID int64
+	if err := db.GetContext(ctx, &companyUserID, query, messageID); err != nil {
+		return 0, err
+	}
+	return companyUserID, nil
+}
+
 func (mr *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 	query := `
         SELECT id, is_from_company, is_from_student, content, is_sent, sent_at
@@ -64,5 +79,15 @@ func (mr *MessageRepository) AddMessage(ctx context.Context, db Execer, param *e
 		return err
 	}
 	param.ID = entity.MessageID(id)
+	return nil
+}
+
+func (mr *MessageRepository) EditMessage(ctx context.Context, db Execer, param *entity.Message) error {
+	param.UpdatedAt = mr.Clocker.Now()
+	query := "UPDATE messages SET content = :content, updated_at = :updated_at WHERE id = :id;"
+	_, err := db.NamedExecContext(ctx, query, param)
+	if err != nil {
+		return err
+	}
 	return nil
 }

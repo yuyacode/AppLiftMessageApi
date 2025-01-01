@@ -40,6 +40,8 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	gmHandler := handler.NewGetMessage(gmService, v)
 	amService := service.NewAddMessage(dbHandlers, messageRepo, messageRepo)
 	amHandler := handler.NewAddMessage(amService, v)
+	emService := service.NewEditMessage(dbHandlers, messageRepo, messageRepo)
+	emHandler := handler.NewEditMessage(emService, v)
 	mux := chi.NewRouter()
 	mux.Use(handler.CORSMiddleware())
 	mux.Route("/messages", func(r chi.Router) {
@@ -52,7 +54,7 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 			r.Use(handler.VerifyAccessTokenMiddleware(vatService))
 			r.Get("/", gmHandler.ServeHTTP)
 			r.Post("/", amHandler.ServeHTTP)
-			// r.Patch("/{id}", fooHandler.ServeHTTP)
+			r.Patch("/{id}", emHandler.ServeHTTP)
 			// r.Delete("/{id}", fooHandler.ServeHTTP)
 		})
 	})

@@ -30,3 +30,7 @@ type GetMessageService interface {
 type AddMessageService interface {
 	AddMessage(ctx context.Context, messageThreadID entity.MessageThreadID, isFromCompany int8, isFromStudent int8, content string, isSent int8, sentAt time.Time) (*entity.Message, error)
 }
+
+type EditMessageService interface {
+	EditMessage(ctx context.Context, id entity.MessageID, content string) error
+}
