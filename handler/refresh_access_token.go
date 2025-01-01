@@ -34,7 +34,7 @@ func (rat *RefreshAccessToken) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	if err := rat.Validator.Struct(requestData); err != nil {
 		RespondJSON(ctx, w, &ErrResponse{
 			Message: err.Error(),
-		}, http.StatusUnauthorized)
+		}, http.StatusBadRequest)
 		return
 	}
 	accessToken, refreshToken, err := rat.Service.RefreshAccessToken(ctx, requestData.ClientID, requestData.ClientSecret)

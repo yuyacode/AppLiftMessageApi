@@ -41,7 +41,7 @@ func (am *AddMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := am.Validator.Struct(requestData); err != nil {
 		RespondJSON(ctx, w, &ErrResponse{
 			Message: err.Error(),
-		}, http.StatusUnauthorized)
+		}, http.StatusBadRequest)
 		return
 	}
 	message, err := am.Service.AddMessage(ctx, requestData.MessageThreadID, requestData.IsFromCompany, requestData.IsFromStudent, requestData.Content, requestData.IsSent, requestData.SentAt)
