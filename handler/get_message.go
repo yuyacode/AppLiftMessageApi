@@ -33,9 +33,6 @@ func NewGetMessage(service GetMessageService, validator *validator.Validate) *Ge
 
 func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	var qp struct {
-		MessageThreadID entity.MessageThreadID `validate:"required,numeric"`
-	}
 	threadIDStr := r.URL.Query().Get("thread_id")
 	if threadIDStr == "" {
 		RespondJSON(ctx, w, &ErrResponse{
@@ -50,14 +47,7 @@ func (gm *GetMessage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}, http.StatusInternalServerError)
 		return
 	}
-	qp.MessageThreadID = entity.MessageThreadID(threadIDInt)
-	if err := gm.Validator.Struct(qp); err != nil {
-		RespondJSON(ctx, w, &ErrResponse{
-			Message: err.Error(),
-		}, http.StatusBadRequest)
-		return
-	}
-	messages, err := gm.Service.GetAllMessages(ctx, qp.MessageThreadID)
+	messages, err := gm.Service.GetAllMessages(ctx, entity.MessageThreadID(threadIDInt))
 	if err != nil {
 		if serviceErr, ok := err.(*ServiceError); ok {
 			RespondJSON(ctx, w, &ErrResponse{
