@@ -26,6 +26,15 @@ func (mr *MessageRepository) GetThreadCompanyOwner(ctx context.Context, db Query
 	return companyUserID, nil
 }
 
+func (mr *MessageRepository) GetThreadStudentOwner(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (int64, error) {
+	query := "SELECT student_user_id FROM message_threads WHERE id = ? AND deleted_at IS NULL;"
+	var studentUserID int64
+	if err := db.GetContext(ctx, &studentUserID, query, messageThreadID); err != nil {
+		return 0, err
+	}
+	return studentUserID, nil
+}
+
 func (mr *MessageRepository) GetThreadCompanyOwnerByMessageID(ctx context.Context, db Queryer, messageID entity.MessageID) (int64, error) {
 	query := `
 		SELECT company_user_id
@@ -52,6 +61,39 @@ func (mr *MessageRepository) GetAllMessagesForCompanyUser(ctx context.Context, d
 			(is_from_company = 1 AND is_sent = 0)
       		OR (is_from_company = 1 AND is_sent = 1)
       		OR (is_from_student = 1 AND is_sent = 1)
+		)
+		ORDER BY sent_at ASC, id ASC;
+    `
+	rows, err := db.QueryxContext(ctx, query, messageThreadID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var messages entity.Messages
+	for rows.Next() {
+		var m entity.Message
+		if err := rows.StructScan(&m); err != nil {
+			return nil, err
+		}
+		messages = append(messages, &m)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return messages, nil
+}
+
+func (mr *MessageRepository) GetAllMessagesForStudentUser(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
+	query := `
+        SELECT id, is_from_company, is_from_student, content, is_sent, sent_at
+        FROM messages
+        WHERE message_thread_id = ?
+		AND deleted_at IS NULL
+		AND
+		(
+			(is_from_student = 1 AND is_sent = 0)
+      		OR (is_from_student = 1 AND is_sent = 1)
+      		OR (is_from_company = 1 AND is_sent = 1)
 		)
 		ORDER BY sent_at ASC, id ASC;
     `

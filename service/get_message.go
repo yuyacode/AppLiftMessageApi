@@ -26,12 +26,12 @@ func NewGetMessage(dbHandlers map[string]*sqlx.DB, messageGetter MessageGetter, 
 }
 
 func (gm *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
-	companyUserID, err := gm.MessageOwnerGetter.GetThreadCompanyOwner(ctx, gm.DBHandlers["common"], messageThreadID)
-	if err != nil {
+	appKind, ok := request.GetAppKind(ctx)
+	if !ok {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,
-			"failed to get threadCompanyOwner",
-			err.Error(),
+			"failed to get app kind",
+			"",
 		)
 	}
 	userID, ok := request.GetUserID(ctx)
@@ -42,20 +42,55 @@ func (gm *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity
 			"",
 		)
 	}
-	if userID != companyUserID {
-		return nil, handler.NewServiceError(
-			http.StatusForbidden,
-			"unauthorized: lack the necessary permissions to retrieve messages",
-			"",
-		)
-	}
-	m, err := gm.MessageGetter.GetAllMessagesForCompanyUser(ctx, gm.DBHandlers["common"], messageThreadID)
-	if err != nil {
-		return nil, handler.NewServiceError(
-			http.StatusInternalServerError,
-			"failed to get message",
-			err.Error(),
-		)
+	var m entity.Messages
+	if appKind == "company" {
+		companyUserID, err := gm.MessageOwnerGetter.GetThreadCompanyOwner(ctx, gm.DBHandlers["common"], messageThreadID)
+		if err != nil {
+			return nil, handler.NewServiceError(
+				http.StatusInternalServerError,
+				"failed to get threadCompanyOwner",
+				err.Error(),
+			)
+		}
+		if userID != companyUserID {
+			return nil, handler.NewServiceError(
+				http.StatusForbidden,
+				"unauthorized: lack the necessary permissions to retrieve messages",
+				"",
+			)
+		}
+		m, err = gm.MessageGetter.GetAllMessagesForCompanyUser(ctx, gm.DBHandlers["common"], messageThreadID)
+		if err != nil {
+			return nil, handler.NewServiceError(
+				http.StatusInternalServerError,
+				"failed to get message",
+				err.Error(),
+			)
+		}
+	} else if appKind == "student" {
+		studentUserID, err := gm.MessageOwnerGetter.GetThreadStudentOwner(ctx, gm.DBHandlers["common"], messageThreadID)
+		if err != nil {
+			return nil, handler.NewServiceError(
+				http.StatusInternalServerError,
+				"failed to get threadStudentOwner",
+				err.Error(),
+			)
+		}
+		if userID != studentUserID {
+			return nil, handler.NewServiceError(
+				http.StatusForbidden,
+				"unauthorized: lack the necessary permissions to retrieve messages",
+				"",
+			)
+		}
+		m, err = gm.MessageGetter.GetAllMessagesForStudentUser(ctx, gm.DBHandlers["common"], messageThreadID)
+		if err != nil {
+			return nil, handler.NewServiceError(
+				http.StatusInternalServerError,
+				"failed to get message",
+				err.Error(),
+			)
+		}
 	}
 	return m, nil
 }
