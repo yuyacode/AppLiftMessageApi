@@ -32,7 +32,7 @@ func (mr *MessageRepository) GetThreadCompanyOwnerByMessageID(ctx context.Contex
 		FROM message_threads
 		INNER JOIN messages
 		ON message_threads.id = messages.message_thread_id
-		WHERE messages.id = ?;
+		WHERE messages.id = ? AND is_from_company = 1;
 	`
 	var companyUserID int64
 	if err := db.GetContext(ctx, &companyUserID, query, messageID); err != nil {
