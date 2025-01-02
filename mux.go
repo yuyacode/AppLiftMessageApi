@@ -42,6 +42,8 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	amHandler := handler.NewAddMessage(amService, v)
 	emService := service.NewEditMessage(dbHandlers, messageRepo, messageRepo)
 	emHandler := handler.NewEditMessage(emService, v)
+	dmService := service.NewDeleteMessage(dbHandlers, messageRepo, messageRepo)
+	dmHandler := handler.NewDeleteMessage(dmService, v)
 	mux := chi.NewRouter()
 	mux.Use(handler.CORSMiddleware())
 	mux.Route("/messages", func(r chi.Router) {
@@ -55,7 +57,7 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 			r.Get("/", gmHandler.ServeHTTP)
 			r.Post("/", amHandler.ServeHTTP)
 			r.Patch("/{id}", emHandler.ServeHTTP)
-			// r.Delete("/{id}", fooHandler.ServeHTTP)
+			r.Delete("/{id}", dmHandler.ServeHTTP)
 		})
 	})
 	return mux, dbCloseFuncs, nil

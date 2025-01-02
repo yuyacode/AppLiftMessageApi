@@ -91,3 +91,12 @@ func (mr *MessageRepository) EditMessage(ctx context.Context, db Execer, param *
 	}
 	return nil
 }
+
+func (mr *MessageRepository) DeleteMessage(ctx context.Context, db Execer, id entity.MessageID) error {
+	query := "UPDATE messages SET deleted_at = ? WHERE id = ?;"
+	_, err := db.ExecContext(ctx, query, mr.Clocker.Now(), id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

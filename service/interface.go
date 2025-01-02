@@ -41,3 +41,7 @@ type MessageAdder interface {
 type MessageEditor interface {
 	EditMessage(ctx context.Context, db store.Execer, param *entity.Message) error
 }
+
+type MessageDeleter interface {
+	DeleteMessage(ctx context.Context, db store.Execer, id entity.MessageID) error
+}

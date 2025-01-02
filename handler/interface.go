@@ -34,3 +34,7 @@ type AddMessageService interface {
 type EditMessageService interface {
 	EditMessage(ctx context.Context, id entity.MessageID, content string) error
 }
+
+type DeleteMessageService interface {
+	DeleteMessage(ctx context.Context, id entity.MessageID) error
+}
