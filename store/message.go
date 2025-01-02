@@ -41,11 +41,18 @@ func (mr *MessageRepository) GetThreadCompanyOwnerByMessageID(ctx context.Contex
 	return companyUserID, nil
 }
 
-func (mr *MessageRepository) GetAllMessages(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
+func (mr *MessageRepository) GetAllMessagesForCompanyUser(ctx context.Context, db Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 	query := `
         SELECT id, is_from_company, is_from_student, content, is_sent, sent_at
         FROM messages
-        WHERE message_thread_id = ? AND deleted_at IS NULL
+        WHERE message_thread_id = ?
+		AND deleted_at IS NULL
+		AND
+		(
+			(is_from_company = 1 AND is_sent = 0)
+      		OR (is_from_company = 1 AND is_sent = 1)
+      		OR (is_from_student = 1 AND is_sent = 1)
+		)
 		ORDER BY sent_at ASC, id ASC;
     `
 	rows, err := db.QueryxContext(ctx, query, messageThreadID)

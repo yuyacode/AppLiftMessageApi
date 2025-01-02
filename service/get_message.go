@@ -49,7 +49,7 @@ func (gm *GetMessage) GetAllMessages(ctx context.Context, messageThreadID entity
 			"",
 		)
 	}
-	m, err := gm.MessageGetter.GetAllMessages(ctx, gm.DBHandlers["common"], messageThreadID)
+	m, err := gm.MessageGetter.GetAllMessagesForCompanyUser(ctx, gm.DBHandlers["common"], messageThreadID)
 	if err != nil {
 		return nil, handler.NewServiceError(
 			http.StatusInternalServerError,

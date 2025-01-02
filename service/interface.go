@@ -31,7 +31,7 @@ type MessageOwnerGetter interface {
 }
 
 type MessageGetter interface {
-	GetAllMessages(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error)
+	GetAllMessagesForCompanyUser(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error)
 }
 
 type MessageAdder interface {
