@@ -18,16 +18,16 @@ import (
 
 func TestGetMessage_GetAllMessages(t *testing.T) {
 	type testCase struct {
-		name               string
-		appKind            string
-		userID             int64
-		prepareOwnerMock   func(*MessageOwnerGetterMock)
-		prepareMessageMock func(*MessageGetterMock)
-		messageThreadID    entity.MessageThreadID
-		wantMessages       entity.Messages
-		wantErr            bool
-		wantErrStatus      int
-		wantErrMsg         string
+		name              string
+		appKind           string
+		userID            int64
+		prepareOwnerMock  func(*MessageOwnerGetterMock)
+		prepareGetterMock func(*MessageGetterMock)
+		messageThreadID   entity.MessageThreadID
+		wantMessages      entity.Messages
+		wantErr           bool
+		wantErrStatus     int
+		wantErrMsg        string
 	}
 	tests := []testCase{
 		{
@@ -82,7 +82,7 @@ func TestGetMessage_GetAllMessages(t *testing.T) {
 					return 1, nil
 				}
 			},
-			prepareMessageMock: func(m *MessageGetterMock) {
+			prepareGetterMock: func(m *MessageGetterMock) {
 				m.GetAllMessagesForCompanyUserFunc = func(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 					return nil, errors.New("get messages error")
 				}
@@ -101,7 +101,7 @@ func TestGetMessage_GetAllMessages(t *testing.T) {
 					return 1, nil
 				}
 			},
-			prepareMessageMock: func(m *MessageGetterMock) {
+			prepareGetterMock: func(m *MessageGetterMock) {
 				m.GetAllMessagesForCompanyUserFunc = func(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 					return entity.Messages{
 						&entity.Message{
@@ -181,7 +181,7 @@ func TestGetMessage_GetAllMessages(t *testing.T) {
 					return 1, nil
 				}
 			},
-			prepareMessageMock: func(m *MessageGetterMock) {
+			prepareGetterMock: func(m *MessageGetterMock) {
 				m.GetAllMessagesForStudentUserFunc = func(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 					return nil, errors.New("get messages error")
 				}
@@ -200,7 +200,7 @@ func TestGetMessage_GetAllMessages(t *testing.T) {
 					return 1, nil
 				}
 			},
-			prepareMessageMock: func(m *MessageGetterMock) {
+			prepareGetterMock: func(m *MessageGetterMock) {
 				m.GetAllMessagesForStudentUserFunc = func(ctx context.Context, db store.Queryer, messageThreadID entity.MessageThreadID) (entity.Messages, error) {
 					return entity.Messages{
 						&entity.Message{
@@ -258,17 +258,17 @@ func TestGetMessage_GetAllMessages(t *testing.T) {
 				ctx = request.SetUserID(ctx, tc.userID)
 			}
 			ownerMock := &MessageOwnerGetterMock{}
-			msgMock := &MessageGetterMock{}
+			getterMock := &MessageGetterMock{}
 			if tc.prepareOwnerMock != nil {
 				tc.prepareOwnerMock(ownerMock)
 			}
-			if tc.prepareMessageMock != nil {
-				tc.prepareMessageMock(msgMock)
+			if tc.prepareGetterMock != nil {
+				tc.prepareGetterMock(getterMock)
 			}
-			svc := NewGetMessage(dbHandlers, msgMock, ownerMock)
+			svc := NewGetMessage(dbHandlers, getterMock, ownerMock)
 			messages, err := svc.GetAllMessages(ctx, tc.messageThreadID)
 			if tc.wantErr {
-				assert.Error(t, err)
+				assert.Error(t, err, "error is expected but got nil")
 				se, ok := err.(*handler.ServiceError)
 				if assert.True(t, ok, "error should be *handler.ServiceError") {
 					assert.Equal(t, tc.wantErrStatus, se.StatusCode)
