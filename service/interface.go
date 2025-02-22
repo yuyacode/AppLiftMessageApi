@@ -8,7 +8,7 @@ import (
 	"github.com/yuyacode/AppLiftMessageApi/store"
 )
 
-//go:generate go run github.com/matryer/moq -out moq_test.go . MessageOwnerGetter MessageGetter MessageAdder
+//go:generate go run github.com/matryer/moq -out moq_test.go . MessageOwnerGetter MessageGetter MessageAdder MessageEditor
 
 type CredentialGetter interface {
 	GetAPIKey(ctx context.Context, db store.Queryer) (string, error)

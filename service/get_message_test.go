@@ -248,6 +248,7 @@ func TestGetMessage_GetAllMessages(t *testing.T) {
 		"common": nil,
 	}
 	for _, tc := range tests {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			ctx := context.Background()
