@@ -389,3 +389,81 @@ func (mock *MessageGetterMock) GetAllMessagesForStudentUserCalls() []struct {
 	mock.lockGetAllMessagesForStudentUser.RUnlock()
 	return calls
 }
+
+// Ensure, that MessageAdderMock does implement MessageAdder.
+// If this is not the case, regenerate this file with moq.
+var _ MessageAdder = &MessageAdderMock{}
+
+// MessageAdderMock is a mock implementation of MessageAdder.
+//
+//	func TestSomethingThatUsesMessageAdder(t *testing.T) {
+//
+//		// make and configure a mocked MessageAdder
+//		mockedMessageAdder := &MessageAdderMock{
+//			AddMessageFunc: func(ctx context.Context, db store.Execer, param *entity.Message) error {
+//				panic("mock out the AddMessage method")
+//			},
+//		}
+//
+//		// use mockedMessageAdder in code that requires MessageAdder
+//		// and then make assertions.
+//
+//	}
+type MessageAdderMock struct {
+	// AddMessageFunc mocks the AddMessage method.
+	AddMessageFunc func(ctx context.Context, db store.Execer, param *entity.Message) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// AddMessage holds details about calls to the AddMessage method.
+		AddMessage []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Execer
+			// Param is the param argument value.
+			Param *entity.Message
+		}
+	}
+	lockAddMessage sync.RWMutex
+}
+
+// AddMessage calls AddMessageFunc.
+func (mock *MessageAdderMock) AddMessage(ctx context.Context, db store.Execer, param *entity.Message) error {
+	if mock.AddMessageFunc == nil {
+		panic("MessageAdderMock.AddMessageFunc: method is nil but MessageAdder.AddMessage was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		Db    store.Execer
+		Param *entity.Message
+	}{
+		Ctx:   ctx,
+		Db:    db,
+		Param: param,
+	}
+	mock.lockAddMessage.Lock()
+	mock.calls.AddMessage = append(mock.calls.AddMessage, callInfo)
+	mock.lockAddMessage.Unlock()
+	return mock.AddMessageFunc(ctx, db, param)
+}
+
+// AddMessageCalls gets all the calls that were made to AddMessage.
+// Check the length with:
+//
+//	len(mockedMessageAdder.AddMessageCalls())
+func (mock *MessageAdderMock) AddMessageCalls() []struct {
+	Ctx   context.Context
+	Db    store.Execer
+	Param *entity.Message
+} {
+	var calls []struct {
+		Ctx   context.Context
+		Db    store.Execer
+		Param *entity.Message
+	}
+	mock.lockAddMessage.RLock()
+	calls = mock.calls.AddMessage
+	mock.lockAddMessage.RUnlock()
+	return calls
+}
