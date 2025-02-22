@@ -467,3 +467,81 @@ func (mock *MessageAdderMock) AddMessageCalls() []struct {
 	mock.lockAddMessage.RUnlock()
 	return calls
 }
+
+// Ensure, that MessageEditorMock does implement MessageEditor.
+// If this is not the case, regenerate this file with moq.
+var _ MessageEditor = &MessageEditorMock{}
+
+// MessageEditorMock is a mock implementation of MessageEditor.
+//
+//	func TestSomethingThatUsesMessageEditor(t *testing.T) {
+//
+//		// make and configure a mocked MessageEditor
+//		mockedMessageEditor := &MessageEditorMock{
+//			EditMessageFunc: func(ctx context.Context, db store.Execer, param *entity.Message) error {
+//				panic("mock out the EditMessage method")
+//			},
+//		}
+//
+//		// use mockedMessageEditor in code that requires MessageEditor
+//		// and then make assertions.
+//
+//	}
+type MessageEditorMock struct {
+	// EditMessageFunc mocks the EditMessage method.
+	EditMessageFunc func(ctx context.Context, db store.Execer, param *entity.Message) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// EditMessage holds details about calls to the EditMessage method.
+		EditMessage []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Execer
+			// Param is the param argument value.
+			Param *entity.Message
+		}
+	}
+	lockEditMessage sync.RWMutex
+}
+
+// EditMessage calls EditMessageFunc.
+func (mock *MessageEditorMock) EditMessage(ctx context.Context, db store.Execer, param *entity.Message) error {
+	if mock.EditMessageFunc == nil {
+		panic("MessageEditorMock.EditMessageFunc: method is nil but MessageEditor.EditMessage was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		Db    store.Execer
+		Param *entity.Message
+	}{
+		Ctx:   ctx,
+		Db:    db,
+		Param: param,
+	}
+	mock.lockEditMessage.Lock()
+	mock.calls.EditMessage = append(mock.calls.EditMessage, callInfo)
+	mock.lockEditMessage.Unlock()
+	return mock.EditMessageFunc(ctx, db, param)
+}
+
+// EditMessageCalls gets all the calls that were made to EditMessage.
+// Check the length with:
+//
+//	len(mockedMessageEditor.EditMessageCalls())
+func (mock *MessageEditorMock) EditMessageCalls() []struct {
+	Ctx   context.Context
+	Db    store.Execer
+	Param *entity.Message
+} {
+	var calls []struct {
+		Ctx   context.Context
+		Db    store.Execer
+		Param *entity.Message
+	}
+	mock.lockEditMessage.RLock()
+	calls = mock.calls.EditMessage
+	mock.lockEditMessage.RUnlock()
+	return calls
+}
