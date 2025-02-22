@@ -114,13 +114,13 @@ func TestAddMessage_AddMessage(t *testing.T) {
 					return nil
 				}
 			},
-			messageThreadID: entity.MessageThreadID(1),
+			messageThreadID: 1,
 			isFromCompany:   1,
 			isFromStudent:   0,
 			content:         "message from company user",
 			isSent:          1,
 			sentAt:          time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
-			wantMsgID:       entity.MessageID(1),
+			wantMsgID:       1,
 			wantErr:         false,
 		},
 		{
@@ -186,13 +186,13 @@ func TestAddMessage_AddMessage(t *testing.T) {
 					return nil
 				}
 			},
-			messageThreadID: entity.MessageThreadID(1),
+			messageThreadID: 1,
 			isFromCompany:   0,
 			isFromStudent:   1,
 			content:         "message from student user",
 			isSent:          1,
 			sentAt:          time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
-			wantMsgID:       entity.MessageID(1),
+			wantMsgID:       1,
 			wantErr:         false,
 		},
 	}
@@ -200,6 +200,7 @@ func TestAddMessage_AddMessage(t *testing.T) {
 		"common": nil,
 	}
 	for _, tc := range tests {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			ctx := context.Background()
