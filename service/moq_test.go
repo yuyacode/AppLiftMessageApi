@@ -545,3 +545,81 @@ func (mock *MessageEditorMock) EditMessageCalls() []struct {
 	mock.lockEditMessage.RUnlock()
 	return calls
 }
+
+// Ensure, that MessageDeleterMock does implement MessageDeleter.
+// If this is not the case, regenerate this file with moq.
+var _ MessageDeleter = &MessageDeleterMock{}
+
+// MessageDeleterMock is a mock implementation of MessageDeleter.
+//
+//	func TestSomethingThatUsesMessageDeleter(t *testing.T) {
+//
+//		// make and configure a mocked MessageDeleter
+//		mockedMessageDeleter := &MessageDeleterMock{
+//			DeleteMessageFunc: func(ctx context.Context, db store.Execer, id entity.MessageID) error {
+//				panic("mock out the DeleteMessage method")
+//			},
+//		}
+//
+//		// use mockedMessageDeleter in code that requires MessageDeleter
+//		// and then make assertions.
+//
+//	}
+type MessageDeleterMock struct {
+	// DeleteMessageFunc mocks the DeleteMessage method.
+	DeleteMessageFunc func(ctx context.Context, db store.Execer, id entity.MessageID) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// DeleteMessage holds details about calls to the DeleteMessage method.
+		DeleteMessage []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Execer
+			// ID is the id argument value.
+			ID entity.MessageID
+		}
+	}
+	lockDeleteMessage sync.RWMutex
+}
+
+// DeleteMessage calls DeleteMessageFunc.
+func (mock *MessageDeleterMock) DeleteMessage(ctx context.Context, db store.Execer, id entity.MessageID) error {
+	if mock.DeleteMessageFunc == nil {
+		panic("MessageDeleterMock.DeleteMessageFunc: method is nil but MessageDeleter.DeleteMessage was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Db  store.Execer
+		ID  entity.MessageID
+	}{
+		Ctx: ctx,
+		Db:  db,
+		ID:  id,
+	}
+	mock.lockDeleteMessage.Lock()
+	mock.calls.DeleteMessage = append(mock.calls.DeleteMessage, callInfo)
+	mock.lockDeleteMessage.Unlock()
+	return mock.DeleteMessageFunc(ctx, db, id)
+}
+
+// DeleteMessageCalls gets all the calls that were made to DeleteMessage.
+// Check the length with:
+//
+//	len(mockedMessageDeleter.DeleteMessageCalls())
+func (mock *MessageDeleterMock) DeleteMessageCalls() []struct {
+	Ctx context.Context
+	Db  store.Execer
+	ID  entity.MessageID
+} {
+	var calls []struct {
+		Ctx context.Context
+		Db  store.Execer
+		ID  entity.MessageID
+	}
+	mock.lockDeleteMessage.RLock()
+	calls = mock.calls.DeleteMessage
+	mock.lockDeleteMessage.RUnlock()
+	return calls
+}
