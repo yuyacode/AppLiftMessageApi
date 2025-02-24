@@ -25,7 +25,8 @@ func CORSMiddleware() func(http.Handler) http.Handler {
 }
 
 func getAllowedOrigin() (string, error) {
-	if err := godotenv.Load(); err != nil {
+	// ローカル環境（ENV=dev）でのみ環境変数を.envで管理している
+	if err := godotenv.Load("/app/.env"); err != nil {
 		if os.Getenv("ENV") == "dev" {
 			return "", err
 		}

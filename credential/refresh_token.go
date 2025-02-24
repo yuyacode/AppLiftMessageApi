@@ -137,7 +137,8 @@ func DecryptRefreshToken(refreshToken string) (string, int64, error) {
 }
 
 func getRefreshTokenSecretKey() ([]byte, error) {
-	if err := godotenv.Load(); err != nil {
+	// ローカル環境（ENV=dev）でのみ環境変数を.envで管理している
+	if err := godotenv.Load("/app/.env"); err != nil {
 		if os.Getenv("ENV") == "dev" {
 			return nil, err
 		}
