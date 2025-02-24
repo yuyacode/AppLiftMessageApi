@@ -5,10 +5,665 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 	"github.com/yuyacode/AppLiftMessageApi/store"
 	"sync"
 )
+
+// Ensure, that CredentialGetterMock does implement CredentialGetter.
+// If this is not the case, regenerate this file with moq.
+var _ CredentialGetter = &CredentialGetterMock{}
+
+// CredentialGetterMock is a mock implementation of CredentialGetter.
+//
+//	func TestSomethingThatUsesCredentialGetter(t *testing.T) {
+//
+//		// make and configure a mocked CredentialGetter
+//		mockedCredentialGetter := &CredentialGetterMock{
+//			GetAPIKeyFunc: func(ctx context.Context, db store.Queryer) (string, error) {
+//				panic("mock out the GetAPIKey method")
+//			},
+//			GetAccessTokenFunc: func(ctx context.Context, db store.Queryer, userID int64) (string, *sql.NullTime, error) {
+//				panic("mock out the GetAccessToken method")
+//			},
+//			GetClientIDFunc: func(ctx context.Context, db store.Queryer, userID int64) (string, error) {
+//				panic("mock out the GetClientID method")
+//			},
+//			GetClientSecretFunc: func(ctx context.Context, db store.Queryer, userID int64) (string, error) {
+//				panic("mock out the GetClientSecret method")
+//			},
+//			GetRefreshTokenFunc: func(ctx context.Context, db store.Queryer, userID int64) (string, error) {
+//				panic("mock out the GetRefreshToken method")
+//			},
+//			SearchByAccessTokenFunc: func(ctx context.Context, db store.Queryer, accessToken string) (bool, error) {
+//				panic("mock out the SearchByAccessToken method")
+//			},
+//			SearchByClientIDFunc: func(ctx context.Context, db store.Queryer, clientID string) (bool, error) {
+//				panic("mock out the SearchByClientID method")
+//			},
+//			SearchByClientSecretFunc: func(ctx context.Context, db store.Queryer, clientSecret string) (bool, error) {
+//				panic("mock out the SearchByClientSecret method")
+//			},
+//			SearchByRefreshTokenFunc: func(ctx context.Context, db store.Queryer, refreshToken string) (bool, error) {
+//				panic("mock out the SearchByRefreshToken method")
+//			},
+//		}
+//
+//		// use mockedCredentialGetter in code that requires CredentialGetter
+//		// and then make assertions.
+//
+//	}
+type CredentialGetterMock struct {
+	// GetAPIKeyFunc mocks the GetAPIKey method.
+	GetAPIKeyFunc func(ctx context.Context, db store.Queryer) (string, error)
+
+	// GetAccessTokenFunc mocks the GetAccessToken method.
+	GetAccessTokenFunc func(ctx context.Context, db store.Queryer, userID int64) (string, *sql.NullTime, error)
+
+	// GetClientIDFunc mocks the GetClientID method.
+	GetClientIDFunc func(ctx context.Context, db store.Queryer, userID int64) (string, error)
+
+	// GetClientSecretFunc mocks the GetClientSecret method.
+	GetClientSecretFunc func(ctx context.Context, db store.Queryer, userID int64) (string, error)
+
+	// GetRefreshTokenFunc mocks the GetRefreshToken method.
+	GetRefreshTokenFunc func(ctx context.Context, db store.Queryer, userID int64) (string, error)
+
+	// SearchByAccessTokenFunc mocks the SearchByAccessToken method.
+	SearchByAccessTokenFunc func(ctx context.Context, db store.Queryer, accessToken string) (bool, error)
+
+	// SearchByClientIDFunc mocks the SearchByClientID method.
+	SearchByClientIDFunc func(ctx context.Context, db store.Queryer, clientID string) (bool, error)
+
+	// SearchByClientSecretFunc mocks the SearchByClientSecret method.
+	SearchByClientSecretFunc func(ctx context.Context, db store.Queryer, clientSecret string) (bool, error)
+
+	// SearchByRefreshTokenFunc mocks the SearchByRefreshToken method.
+	SearchByRefreshTokenFunc func(ctx context.Context, db store.Queryer, refreshToken string) (bool, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// GetAPIKey holds details about calls to the GetAPIKey method.
+		GetAPIKey []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+		}
+		// GetAccessToken holds details about calls to the GetAccessToken method.
+		GetAccessToken []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+			// UserID is the userID argument value.
+			UserID int64
+		}
+		// GetClientID holds details about calls to the GetClientID method.
+		GetClientID []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+			// UserID is the userID argument value.
+			UserID int64
+		}
+		// GetClientSecret holds details about calls to the GetClientSecret method.
+		GetClientSecret []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+			// UserID is the userID argument value.
+			UserID int64
+		}
+		// GetRefreshToken holds details about calls to the GetRefreshToken method.
+		GetRefreshToken []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+			// UserID is the userID argument value.
+			UserID int64
+		}
+		// SearchByAccessToken holds details about calls to the SearchByAccessToken method.
+		SearchByAccessToken []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+			// AccessToken is the accessToken argument value.
+			AccessToken string
+		}
+		// SearchByClientID holds details about calls to the SearchByClientID method.
+		SearchByClientID []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+			// ClientID is the clientID argument value.
+			ClientID string
+		}
+		// SearchByClientSecret holds details about calls to the SearchByClientSecret method.
+		SearchByClientSecret []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+			// ClientSecret is the clientSecret argument value.
+			ClientSecret string
+		}
+		// SearchByRefreshToken holds details about calls to the SearchByRefreshToken method.
+		SearchByRefreshToken []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Queryer
+			// RefreshToken is the refreshToken argument value.
+			RefreshToken string
+		}
+	}
+	lockGetAPIKey            sync.RWMutex
+	lockGetAccessToken       sync.RWMutex
+	lockGetClientID          sync.RWMutex
+	lockGetClientSecret      sync.RWMutex
+	lockGetRefreshToken      sync.RWMutex
+	lockSearchByAccessToken  sync.RWMutex
+	lockSearchByClientID     sync.RWMutex
+	lockSearchByClientSecret sync.RWMutex
+	lockSearchByRefreshToken sync.RWMutex
+}
+
+// GetAPIKey calls GetAPIKeyFunc.
+func (mock *CredentialGetterMock) GetAPIKey(ctx context.Context, db store.Queryer) (string, error) {
+	if mock.GetAPIKeyFunc == nil {
+		panic("CredentialGetterMock.GetAPIKeyFunc: method is nil but CredentialGetter.GetAPIKey was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Db  store.Queryer
+	}{
+		Ctx: ctx,
+		Db:  db,
+	}
+	mock.lockGetAPIKey.Lock()
+	mock.calls.GetAPIKey = append(mock.calls.GetAPIKey, callInfo)
+	mock.lockGetAPIKey.Unlock()
+	return mock.GetAPIKeyFunc(ctx, db)
+}
+
+// GetAPIKeyCalls gets all the calls that were made to GetAPIKey.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.GetAPIKeyCalls())
+func (mock *CredentialGetterMock) GetAPIKeyCalls() []struct {
+	Ctx context.Context
+	Db  store.Queryer
+} {
+	var calls []struct {
+		Ctx context.Context
+		Db  store.Queryer
+	}
+	mock.lockGetAPIKey.RLock()
+	calls = mock.calls.GetAPIKey
+	mock.lockGetAPIKey.RUnlock()
+	return calls
+}
+
+// GetAccessToken calls GetAccessTokenFunc.
+func (mock *CredentialGetterMock) GetAccessToken(ctx context.Context, db store.Queryer, userID int64) (string, *sql.NullTime, error) {
+	if mock.GetAccessTokenFunc == nil {
+		panic("CredentialGetterMock.GetAccessTokenFunc: method is nil but CredentialGetter.GetAccessToken was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Db     store.Queryer
+		UserID int64
+	}{
+		Ctx:    ctx,
+		Db:     db,
+		UserID: userID,
+	}
+	mock.lockGetAccessToken.Lock()
+	mock.calls.GetAccessToken = append(mock.calls.GetAccessToken, callInfo)
+	mock.lockGetAccessToken.Unlock()
+	return mock.GetAccessTokenFunc(ctx, db, userID)
+}
+
+// GetAccessTokenCalls gets all the calls that were made to GetAccessToken.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.GetAccessTokenCalls())
+func (mock *CredentialGetterMock) GetAccessTokenCalls() []struct {
+	Ctx    context.Context
+	Db     store.Queryer
+	UserID int64
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Db     store.Queryer
+		UserID int64
+	}
+	mock.lockGetAccessToken.RLock()
+	calls = mock.calls.GetAccessToken
+	mock.lockGetAccessToken.RUnlock()
+	return calls
+}
+
+// GetClientID calls GetClientIDFunc.
+func (mock *CredentialGetterMock) GetClientID(ctx context.Context, db store.Queryer, userID int64) (string, error) {
+	if mock.GetClientIDFunc == nil {
+		panic("CredentialGetterMock.GetClientIDFunc: method is nil but CredentialGetter.GetClientID was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Db     store.Queryer
+		UserID int64
+	}{
+		Ctx:    ctx,
+		Db:     db,
+		UserID: userID,
+	}
+	mock.lockGetClientID.Lock()
+	mock.calls.GetClientID = append(mock.calls.GetClientID, callInfo)
+	mock.lockGetClientID.Unlock()
+	return mock.GetClientIDFunc(ctx, db, userID)
+}
+
+// GetClientIDCalls gets all the calls that were made to GetClientID.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.GetClientIDCalls())
+func (mock *CredentialGetterMock) GetClientIDCalls() []struct {
+	Ctx    context.Context
+	Db     store.Queryer
+	UserID int64
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Db     store.Queryer
+		UserID int64
+	}
+	mock.lockGetClientID.RLock()
+	calls = mock.calls.GetClientID
+	mock.lockGetClientID.RUnlock()
+	return calls
+}
+
+// GetClientSecret calls GetClientSecretFunc.
+func (mock *CredentialGetterMock) GetClientSecret(ctx context.Context, db store.Queryer, userID int64) (string, error) {
+	if mock.GetClientSecretFunc == nil {
+		panic("CredentialGetterMock.GetClientSecretFunc: method is nil but CredentialGetter.GetClientSecret was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Db     store.Queryer
+		UserID int64
+	}{
+		Ctx:    ctx,
+		Db:     db,
+		UserID: userID,
+	}
+	mock.lockGetClientSecret.Lock()
+	mock.calls.GetClientSecret = append(mock.calls.GetClientSecret, callInfo)
+	mock.lockGetClientSecret.Unlock()
+	return mock.GetClientSecretFunc(ctx, db, userID)
+}
+
+// GetClientSecretCalls gets all the calls that were made to GetClientSecret.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.GetClientSecretCalls())
+func (mock *CredentialGetterMock) GetClientSecretCalls() []struct {
+	Ctx    context.Context
+	Db     store.Queryer
+	UserID int64
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Db     store.Queryer
+		UserID int64
+	}
+	mock.lockGetClientSecret.RLock()
+	calls = mock.calls.GetClientSecret
+	mock.lockGetClientSecret.RUnlock()
+	return calls
+}
+
+// GetRefreshToken calls GetRefreshTokenFunc.
+func (mock *CredentialGetterMock) GetRefreshToken(ctx context.Context, db store.Queryer, userID int64) (string, error) {
+	if mock.GetRefreshTokenFunc == nil {
+		panic("CredentialGetterMock.GetRefreshTokenFunc: method is nil but CredentialGetter.GetRefreshToken was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Db     store.Queryer
+		UserID int64
+	}{
+		Ctx:    ctx,
+		Db:     db,
+		UserID: userID,
+	}
+	mock.lockGetRefreshToken.Lock()
+	mock.calls.GetRefreshToken = append(mock.calls.GetRefreshToken, callInfo)
+	mock.lockGetRefreshToken.Unlock()
+	return mock.GetRefreshTokenFunc(ctx, db, userID)
+}
+
+// GetRefreshTokenCalls gets all the calls that were made to GetRefreshToken.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.GetRefreshTokenCalls())
+func (mock *CredentialGetterMock) GetRefreshTokenCalls() []struct {
+	Ctx    context.Context
+	Db     store.Queryer
+	UserID int64
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Db     store.Queryer
+		UserID int64
+	}
+	mock.lockGetRefreshToken.RLock()
+	calls = mock.calls.GetRefreshToken
+	mock.lockGetRefreshToken.RUnlock()
+	return calls
+}
+
+// SearchByAccessToken calls SearchByAccessTokenFunc.
+func (mock *CredentialGetterMock) SearchByAccessToken(ctx context.Context, db store.Queryer, accessToken string) (bool, error) {
+	if mock.SearchByAccessTokenFunc == nil {
+		panic("CredentialGetterMock.SearchByAccessTokenFunc: method is nil but CredentialGetter.SearchByAccessToken was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		Db          store.Queryer
+		AccessToken string
+	}{
+		Ctx:         ctx,
+		Db:          db,
+		AccessToken: accessToken,
+	}
+	mock.lockSearchByAccessToken.Lock()
+	mock.calls.SearchByAccessToken = append(mock.calls.SearchByAccessToken, callInfo)
+	mock.lockSearchByAccessToken.Unlock()
+	return mock.SearchByAccessTokenFunc(ctx, db, accessToken)
+}
+
+// SearchByAccessTokenCalls gets all the calls that were made to SearchByAccessToken.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.SearchByAccessTokenCalls())
+func (mock *CredentialGetterMock) SearchByAccessTokenCalls() []struct {
+	Ctx         context.Context
+	Db          store.Queryer
+	AccessToken string
+} {
+	var calls []struct {
+		Ctx         context.Context
+		Db          store.Queryer
+		AccessToken string
+	}
+	mock.lockSearchByAccessToken.RLock()
+	calls = mock.calls.SearchByAccessToken
+	mock.lockSearchByAccessToken.RUnlock()
+	return calls
+}
+
+// SearchByClientID calls SearchByClientIDFunc.
+func (mock *CredentialGetterMock) SearchByClientID(ctx context.Context, db store.Queryer, clientID string) (bool, error) {
+	if mock.SearchByClientIDFunc == nil {
+		panic("CredentialGetterMock.SearchByClientIDFunc: method is nil but CredentialGetter.SearchByClientID was just called")
+	}
+	callInfo := struct {
+		Ctx      context.Context
+		Db       store.Queryer
+		ClientID string
+	}{
+		Ctx:      ctx,
+		Db:       db,
+		ClientID: clientID,
+	}
+	mock.lockSearchByClientID.Lock()
+	mock.calls.SearchByClientID = append(mock.calls.SearchByClientID, callInfo)
+	mock.lockSearchByClientID.Unlock()
+	return mock.SearchByClientIDFunc(ctx, db, clientID)
+}
+
+// SearchByClientIDCalls gets all the calls that were made to SearchByClientID.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.SearchByClientIDCalls())
+func (mock *CredentialGetterMock) SearchByClientIDCalls() []struct {
+	Ctx      context.Context
+	Db       store.Queryer
+	ClientID string
+} {
+	var calls []struct {
+		Ctx      context.Context
+		Db       store.Queryer
+		ClientID string
+	}
+	mock.lockSearchByClientID.RLock()
+	calls = mock.calls.SearchByClientID
+	mock.lockSearchByClientID.RUnlock()
+	return calls
+}
+
+// SearchByClientSecret calls SearchByClientSecretFunc.
+func (mock *CredentialGetterMock) SearchByClientSecret(ctx context.Context, db store.Queryer, clientSecret string) (bool, error) {
+	if mock.SearchByClientSecretFunc == nil {
+		panic("CredentialGetterMock.SearchByClientSecretFunc: method is nil but CredentialGetter.SearchByClientSecret was just called")
+	}
+	callInfo := struct {
+		Ctx          context.Context
+		Db           store.Queryer
+		ClientSecret string
+	}{
+		Ctx:          ctx,
+		Db:           db,
+		ClientSecret: clientSecret,
+	}
+	mock.lockSearchByClientSecret.Lock()
+	mock.calls.SearchByClientSecret = append(mock.calls.SearchByClientSecret, callInfo)
+	mock.lockSearchByClientSecret.Unlock()
+	return mock.SearchByClientSecretFunc(ctx, db, clientSecret)
+}
+
+// SearchByClientSecretCalls gets all the calls that were made to SearchByClientSecret.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.SearchByClientSecretCalls())
+func (mock *CredentialGetterMock) SearchByClientSecretCalls() []struct {
+	Ctx          context.Context
+	Db           store.Queryer
+	ClientSecret string
+} {
+	var calls []struct {
+		Ctx          context.Context
+		Db           store.Queryer
+		ClientSecret string
+	}
+	mock.lockSearchByClientSecret.RLock()
+	calls = mock.calls.SearchByClientSecret
+	mock.lockSearchByClientSecret.RUnlock()
+	return calls
+}
+
+// SearchByRefreshToken calls SearchByRefreshTokenFunc.
+func (mock *CredentialGetterMock) SearchByRefreshToken(ctx context.Context, db store.Queryer, refreshToken string) (bool, error) {
+	if mock.SearchByRefreshTokenFunc == nil {
+		panic("CredentialGetterMock.SearchByRefreshTokenFunc: method is nil but CredentialGetter.SearchByRefreshToken was just called")
+	}
+	callInfo := struct {
+		Ctx          context.Context
+		Db           store.Queryer
+		RefreshToken string
+	}{
+		Ctx:          ctx,
+		Db:           db,
+		RefreshToken: refreshToken,
+	}
+	mock.lockSearchByRefreshToken.Lock()
+	mock.calls.SearchByRefreshToken = append(mock.calls.SearchByRefreshToken, callInfo)
+	mock.lockSearchByRefreshToken.Unlock()
+	return mock.SearchByRefreshTokenFunc(ctx, db, refreshToken)
+}
+
+// SearchByRefreshTokenCalls gets all the calls that were made to SearchByRefreshToken.
+// Check the length with:
+//
+//	len(mockedCredentialGetter.SearchByRefreshTokenCalls())
+func (mock *CredentialGetterMock) SearchByRefreshTokenCalls() []struct {
+	Ctx          context.Context
+	Db           store.Queryer
+	RefreshToken string
+} {
+	var calls []struct {
+		Ctx          context.Context
+		Db           store.Queryer
+		RefreshToken string
+	}
+	mock.lockSearchByRefreshToken.RLock()
+	calls = mock.calls.SearchByRefreshToken
+	mock.lockSearchByRefreshToken.RUnlock()
+	return calls
+}
+
+// Ensure, that CredentialSetterMock does implement CredentialSetter.
+// If this is not the case, regenerate this file with moq.
+var _ CredentialSetter = &CredentialSetterMock{}
+
+// CredentialSetterMock is a mock implementation of CredentialSetter.
+//
+//	func TestSomethingThatUsesCredentialSetter(t *testing.T) {
+//
+//		// make and configure a mocked CredentialSetter
+//		mockedCredentialSetter := &CredentialSetterMock{
+//			SaveClientIDSecretFunc: func(ctx context.Context, db store.Execer, param *entity.MessageAPICredential) error {
+//				panic("mock out the SaveClientIDSecret method")
+//			},
+//			SaveTokenFunc: func(ctx context.Context, db store.Execer, param *entity.MessageAPICredential) error {
+//				panic("mock out the SaveToken method")
+//			},
+//		}
+//
+//		// use mockedCredentialSetter in code that requires CredentialSetter
+//		// and then make assertions.
+//
+//	}
+type CredentialSetterMock struct {
+	// SaveClientIDSecretFunc mocks the SaveClientIDSecret method.
+	SaveClientIDSecretFunc func(ctx context.Context, db store.Execer, param *entity.MessageAPICredential) error
+
+	// SaveTokenFunc mocks the SaveToken method.
+	SaveTokenFunc func(ctx context.Context, db store.Execer, param *entity.MessageAPICredential) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// SaveClientIDSecret holds details about calls to the SaveClientIDSecret method.
+		SaveClientIDSecret []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Execer
+			// Param is the param argument value.
+			Param *entity.MessageAPICredential
+		}
+		// SaveToken holds details about calls to the SaveToken method.
+		SaveToken []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Db is the db argument value.
+			Db store.Execer
+			// Param is the param argument value.
+			Param *entity.MessageAPICredential
+		}
+	}
+	lockSaveClientIDSecret sync.RWMutex
+	lockSaveToken          sync.RWMutex
+}
+
+// SaveClientIDSecret calls SaveClientIDSecretFunc.
+func (mock *CredentialSetterMock) SaveClientIDSecret(ctx context.Context, db store.Execer, param *entity.MessageAPICredential) error {
+	if mock.SaveClientIDSecretFunc == nil {
+		panic("CredentialSetterMock.SaveClientIDSecretFunc: method is nil but CredentialSetter.SaveClientIDSecret was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		Db    store.Execer
+		Param *entity.MessageAPICredential
+	}{
+		Ctx:   ctx,
+		Db:    db,
+		Param: param,
+	}
+	mock.lockSaveClientIDSecret.Lock()
+	mock.calls.SaveClientIDSecret = append(mock.calls.SaveClientIDSecret, callInfo)
+	mock.lockSaveClientIDSecret.Unlock()
+	return mock.SaveClientIDSecretFunc(ctx, db, param)
+}
+
+// SaveClientIDSecretCalls gets all the calls that were made to SaveClientIDSecret.
+// Check the length with:
+//
+//	len(mockedCredentialSetter.SaveClientIDSecretCalls())
+func (mock *CredentialSetterMock) SaveClientIDSecretCalls() []struct {
+	Ctx   context.Context
+	Db    store.Execer
+	Param *entity.MessageAPICredential
+} {
+	var calls []struct {
+		Ctx   context.Context
+		Db    store.Execer
+		Param *entity.MessageAPICredential
+	}
+	mock.lockSaveClientIDSecret.RLock()
+	calls = mock.calls.SaveClientIDSecret
+	mock.lockSaveClientIDSecret.RUnlock()
+	return calls
+}
+
+// SaveToken calls SaveTokenFunc.
+func (mock *CredentialSetterMock) SaveToken(ctx context.Context, db store.Execer, param *entity.MessageAPICredential) error {
+	if mock.SaveTokenFunc == nil {
+		panic("CredentialSetterMock.SaveTokenFunc: method is nil but CredentialSetter.SaveToken was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		Db    store.Execer
+		Param *entity.MessageAPICredential
+	}{
+		Ctx:   ctx,
+		Db:    db,
+		Param: param,
+	}
+	mock.lockSaveToken.Lock()
+	mock.calls.SaveToken = append(mock.calls.SaveToken, callInfo)
+	mock.lockSaveToken.Unlock()
+	return mock.SaveTokenFunc(ctx, db, param)
+}
+
+// SaveTokenCalls gets all the calls that were made to SaveToken.
+// Check the length with:
+//
+//	len(mockedCredentialSetter.SaveTokenCalls())
+func (mock *CredentialSetterMock) SaveTokenCalls() []struct {
+	Ctx   context.Context
+	Db    store.Execer
+	Param *entity.MessageAPICredential
+} {
+	var calls []struct {
+		Ctx   context.Context
+		Db    store.Execer
+		Param *entity.MessageAPICredential
+	}
+	mock.lockSaveToken.RLock()
+	calls = mock.calls.SaveToken
+	mock.lockSaveToken.RUnlock()
+	return calls
+}
 
 // Ensure, that MessageOwnerGetterMock does implement MessageOwnerGetter.
 // If this is not the case, regenerate this file with moq.
