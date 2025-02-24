@@ -7,6 +7,8 @@ on:
 jobs:
   unit-test:
     runs-on: ubuntu-latest
+    env:
+      ENV: ci
 
     steps:
       - name: Check out code
@@ -23,6 +25,9 @@ jobs:
 
       - name: Run tests
         run: go test ./... -coverprofile=coverage.out
+        env:
+          ACCESS_TOKEN_SECRET_KEY: ${{ secrets.ACCESS_TOKEN_SECRET_KEY_CI }}
+          REFRESH_TOKEN_SECRET_KEY: ${{ secrets.REFRESH_TOKEN_SECRET_KEY_CI }}
 
       - name: report coverage
         uses: k1LoW/octocov-action@v1
