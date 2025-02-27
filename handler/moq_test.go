@@ -10,6 +10,156 @@ import (
 	"time"
 )
 
+// Ensure, that RegisterOAuthServiceMock does implement RegisterOAuthService.
+// If this is not the case, regenerate this file with moq.
+var _ RegisterOAuthService = &RegisterOAuthServiceMock{}
+
+// RegisterOAuthServiceMock is a mock implementation of RegisterOAuthService.
+//
+//	func TestSomethingThatUsesRegisterOAuthService(t *testing.T) {
+//
+//		// make and configure a mocked RegisterOAuthService
+//		mockedRegisterOAuthService := &RegisterOAuthServiceMock{
+//			RegisterOAuthFunc: func(ctx context.Context, apiKey string) error {
+//				panic("mock out the RegisterOAuth method")
+//			},
+//		}
+//
+//		// use mockedRegisterOAuthService in code that requires RegisterOAuthService
+//		// and then make assertions.
+//
+//	}
+type RegisterOAuthServiceMock struct {
+	// RegisterOAuthFunc mocks the RegisterOAuth method.
+	RegisterOAuthFunc func(ctx context.Context, apiKey string) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// RegisterOAuth holds details about calls to the RegisterOAuth method.
+		RegisterOAuth []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ApiKey is the apiKey argument value.
+			ApiKey string
+		}
+	}
+	lockRegisterOAuth sync.RWMutex
+}
+
+// RegisterOAuth calls RegisterOAuthFunc.
+func (mock *RegisterOAuthServiceMock) RegisterOAuth(ctx context.Context, apiKey string) error {
+	if mock.RegisterOAuthFunc == nil {
+		panic("RegisterOAuthServiceMock.RegisterOAuthFunc: method is nil but RegisterOAuthService.RegisterOAuth was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		ApiKey string
+	}{
+		Ctx:    ctx,
+		ApiKey: apiKey,
+	}
+	mock.lockRegisterOAuth.Lock()
+	mock.calls.RegisterOAuth = append(mock.calls.RegisterOAuth, callInfo)
+	mock.lockRegisterOAuth.Unlock()
+	return mock.RegisterOAuthFunc(ctx, apiKey)
+}
+
+// RegisterOAuthCalls gets all the calls that were made to RegisterOAuth.
+// Check the length with:
+//
+//	len(mockedRegisterOAuthService.RegisterOAuthCalls())
+func (mock *RegisterOAuthServiceMock) RegisterOAuthCalls() []struct {
+	Ctx    context.Context
+	ApiKey string
+} {
+	var calls []struct {
+		Ctx    context.Context
+		ApiKey string
+	}
+	mock.lockRegisterOAuth.RLock()
+	calls = mock.calls.RegisterOAuth
+	mock.lockRegisterOAuth.RUnlock()
+	return calls
+}
+
+// Ensure, that RefreshAccessTokenServiceMock does implement RefreshAccessTokenService.
+// If this is not the case, regenerate this file with moq.
+var _ RefreshAccessTokenService = &RefreshAccessTokenServiceMock{}
+
+// RefreshAccessTokenServiceMock is a mock implementation of RefreshAccessTokenService.
+//
+//	func TestSomethingThatUsesRefreshAccessTokenService(t *testing.T) {
+//
+//		// make and configure a mocked RefreshAccessTokenService
+//		mockedRefreshAccessTokenService := &RefreshAccessTokenServiceMock{
+//			RefreshAccessTokenFunc: func(ctx context.Context, client_id string, client_secret string) (string, string, error) {
+//				panic("mock out the RefreshAccessToken method")
+//			},
+//		}
+//
+//		// use mockedRefreshAccessTokenService in code that requires RefreshAccessTokenService
+//		// and then make assertions.
+//
+//	}
+type RefreshAccessTokenServiceMock struct {
+	// RefreshAccessTokenFunc mocks the RefreshAccessToken method.
+	RefreshAccessTokenFunc func(ctx context.Context, client_id string, client_secret string) (string, string, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// RefreshAccessToken holds details about calls to the RefreshAccessToken method.
+		RefreshAccessToken []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Client_id is the client_id argument value.
+			Client_id string
+			// Client_secret is the client_secret argument value.
+			Client_secret string
+		}
+	}
+	lockRefreshAccessToken sync.RWMutex
+}
+
+// RefreshAccessToken calls RefreshAccessTokenFunc.
+func (mock *RefreshAccessTokenServiceMock) RefreshAccessToken(ctx context.Context, client_id string, client_secret string) (string, string, error) {
+	if mock.RefreshAccessTokenFunc == nil {
+		panic("RefreshAccessTokenServiceMock.RefreshAccessTokenFunc: method is nil but RefreshAccessTokenService.RefreshAccessToken was just called")
+	}
+	callInfo := struct {
+		Ctx           context.Context
+		Client_id     string
+		Client_secret string
+	}{
+		Ctx:           ctx,
+		Client_id:     client_id,
+		Client_secret: client_secret,
+	}
+	mock.lockRefreshAccessToken.Lock()
+	mock.calls.RefreshAccessToken = append(mock.calls.RefreshAccessToken, callInfo)
+	mock.lockRefreshAccessToken.Unlock()
+	return mock.RefreshAccessTokenFunc(ctx, client_id, client_secret)
+}
+
+// RefreshAccessTokenCalls gets all the calls that were made to RefreshAccessToken.
+// Check the length with:
+//
+//	len(mockedRefreshAccessTokenService.RefreshAccessTokenCalls())
+func (mock *RefreshAccessTokenServiceMock) RefreshAccessTokenCalls() []struct {
+	Ctx           context.Context
+	Client_id     string
+	Client_secret string
+} {
+	var calls []struct {
+		Ctx           context.Context
+		Client_id     string
+		Client_secret string
+	}
+	mock.lockRefreshAccessToken.RLock()
+	calls = mock.calls.RefreshAccessToken
+	mock.lockRefreshAccessToken.RUnlock()
+	return calls
+}
+
 // Ensure, that GetMessageServiceMock does implement GetMessageService.
 // If this is not the case, regenerate this file with moq.
 var _ GetMessageService = &GetMessageServiceMock{}
@@ -181,5 +331,155 @@ func (mock *AddMessageServiceMock) AddMessageCalls() []struct {
 	mock.lockAddMessage.RLock()
 	calls = mock.calls.AddMessage
 	mock.lockAddMessage.RUnlock()
+	return calls
+}
+
+// Ensure, that EditMessageServiceMock does implement EditMessageService.
+// If this is not the case, regenerate this file with moq.
+var _ EditMessageService = &EditMessageServiceMock{}
+
+// EditMessageServiceMock is a mock implementation of EditMessageService.
+//
+//	func TestSomethingThatUsesEditMessageService(t *testing.T) {
+//
+//		// make and configure a mocked EditMessageService
+//		mockedEditMessageService := &EditMessageServiceMock{
+//			EditMessageFunc: func(ctx context.Context, id entity.MessageID, content string) error {
+//				panic("mock out the EditMessage method")
+//			},
+//		}
+//
+//		// use mockedEditMessageService in code that requires EditMessageService
+//		// and then make assertions.
+//
+//	}
+type EditMessageServiceMock struct {
+	// EditMessageFunc mocks the EditMessage method.
+	EditMessageFunc func(ctx context.Context, id entity.MessageID, content string) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// EditMessage holds details about calls to the EditMessage method.
+		EditMessage []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ID is the id argument value.
+			ID entity.MessageID
+			// Content is the content argument value.
+			Content string
+		}
+	}
+	lockEditMessage sync.RWMutex
+}
+
+// EditMessage calls EditMessageFunc.
+func (mock *EditMessageServiceMock) EditMessage(ctx context.Context, id entity.MessageID, content string) error {
+	if mock.EditMessageFunc == nil {
+		panic("EditMessageServiceMock.EditMessageFunc: method is nil but EditMessageService.EditMessage was just called")
+	}
+	callInfo := struct {
+		Ctx     context.Context
+		ID      entity.MessageID
+		Content string
+	}{
+		Ctx:     ctx,
+		ID:      id,
+		Content: content,
+	}
+	mock.lockEditMessage.Lock()
+	mock.calls.EditMessage = append(mock.calls.EditMessage, callInfo)
+	mock.lockEditMessage.Unlock()
+	return mock.EditMessageFunc(ctx, id, content)
+}
+
+// EditMessageCalls gets all the calls that were made to EditMessage.
+// Check the length with:
+//
+//	len(mockedEditMessageService.EditMessageCalls())
+func (mock *EditMessageServiceMock) EditMessageCalls() []struct {
+	Ctx     context.Context
+	ID      entity.MessageID
+	Content string
+} {
+	var calls []struct {
+		Ctx     context.Context
+		ID      entity.MessageID
+		Content string
+	}
+	mock.lockEditMessage.RLock()
+	calls = mock.calls.EditMessage
+	mock.lockEditMessage.RUnlock()
+	return calls
+}
+
+// Ensure, that DeleteMessageServiceMock does implement DeleteMessageService.
+// If this is not the case, regenerate this file with moq.
+var _ DeleteMessageService = &DeleteMessageServiceMock{}
+
+// DeleteMessageServiceMock is a mock implementation of DeleteMessageService.
+//
+//	func TestSomethingThatUsesDeleteMessageService(t *testing.T) {
+//
+//		// make and configure a mocked DeleteMessageService
+//		mockedDeleteMessageService := &DeleteMessageServiceMock{
+//			DeleteMessageFunc: func(ctx context.Context, id entity.MessageID) error {
+//				panic("mock out the DeleteMessage method")
+//			},
+//		}
+//
+//		// use mockedDeleteMessageService in code that requires DeleteMessageService
+//		// and then make assertions.
+//
+//	}
+type DeleteMessageServiceMock struct {
+	// DeleteMessageFunc mocks the DeleteMessage method.
+	DeleteMessageFunc func(ctx context.Context, id entity.MessageID) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// DeleteMessage holds details about calls to the DeleteMessage method.
+		DeleteMessage []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ID is the id argument value.
+			ID entity.MessageID
+		}
+	}
+	lockDeleteMessage sync.RWMutex
+}
+
+// DeleteMessage calls DeleteMessageFunc.
+func (mock *DeleteMessageServiceMock) DeleteMessage(ctx context.Context, id entity.MessageID) error {
+	if mock.DeleteMessageFunc == nil {
+		panic("DeleteMessageServiceMock.DeleteMessageFunc: method is nil but DeleteMessageService.DeleteMessage was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		ID  entity.MessageID
+	}{
+		Ctx: ctx,
+		ID:  id,
+	}
+	mock.lockDeleteMessage.Lock()
+	mock.calls.DeleteMessage = append(mock.calls.DeleteMessage, callInfo)
+	mock.lockDeleteMessage.Unlock()
+	return mock.DeleteMessageFunc(ctx, id)
+}
+
+// DeleteMessageCalls gets all the calls that were made to DeleteMessage.
+// Check the length with:
+//
+//	len(mockedDeleteMessageService.DeleteMessageCalls())
+func (mock *DeleteMessageServiceMock) DeleteMessageCalls() []struct {
+	Ctx context.Context
+	ID  entity.MessageID
+} {
+	var calls []struct {
+		Ctx context.Context
+		ID  entity.MessageID
+	}
+	mock.lockDeleteMessage.RLock()
+	calls = mock.calls.DeleteMessage
+	mock.lockDeleteMessage.RUnlock()
 	return calls
 }
