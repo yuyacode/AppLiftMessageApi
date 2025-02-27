@@ -7,6 +7,7 @@ import (
 	"context"
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 	"sync"
+	"time"
 )
 
 // Ensure, that GetMessageServiceMock does implement GetMessageService.
@@ -78,5 +79,107 @@ func (mock *GetMessageServiceMock) GetAllMessagesCalls() []struct {
 	mock.lockGetAllMessages.RLock()
 	calls = mock.calls.GetAllMessages
 	mock.lockGetAllMessages.RUnlock()
+	return calls
+}
+
+// Ensure, that AddMessageServiceMock does implement AddMessageService.
+// If this is not the case, regenerate this file with moq.
+var _ AddMessageService = &AddMessageServiceMock{}
+
+// AddMessageServiceMock is a mock implementation of AddMessageService.
+//
+//	func TestSomethingThatUsesAddMessageService(t *testing.T) {
+//
+//		// make and configure a mocked AddMessageService
+//		mockedAddMessageService := &AddMessageServiceMock{
+//			AddMessageFunc: func(ctx context.Context, messageThreadID entity.MessageThreadID, isFromCompany int8, isFromStudent int8, content string, isSent int8, sentAt time.Time) (*entity.Message, error) {
+//				panic("mock out the AddMessage method")
+//			},
+//		}
+//
+//		// use mockedAddMessageService in code that requires AddMessageService
+//		// and then make assertions.
+//
+//	}
+type AddMessageServiceMock struct {
+	// AddMessageFunc mocks the AddMessage method.
+	AddMessageFunc func(ctx context.Context, messageThreadID entity.MessageThreadID, isFromCompany int8, isFromStudent int8, content string, isSent int8, sentAt time.Time) (*entity.Message, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// AddMessage holds details about calls to the AddMessage method.
+		AddMessage []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// MessageThreadID is the messageThreadID argument value.
+			MessageThreadID entity.MessageThreadID
+			// IsFromCompany is the isFromCompany argument value.
+			IsFromCompany int8
+			// IsFromStudent is the isFromStudent argument value.
+			IsFromStudent int8
+			// Content is the content argument value.
+			Content string
+			// IsSent is the isSent argument value.
+			IsSent int8
+			// SentAt is the sentAt argument value.
+			SentAt time.Time
+		}
+	}
+	lockAddMessage sync.RWMutex
+}
+
+// AddMessage calls AddMessageFunc.
+func (mock *AddMessageServiceMock) AddMessage(ctx context.Context, messageThreadID entity.MessageThreadID, isFromCompany int8, isFromStudent int8, content string, isSent int8, sentAt time.Time) (*entity.Message, error) {
+	if mock.AddMessageFunc == nil {
+		panic("AddMessageServiceMock.AddMessageFunc: method is nil but AddMessageService.AddMessage was just called")
+	}
+	callInfo := struct {
+		Ctx             context.Context
+		MessageThreadID entity.MessageThreadID
+		IsFromCompany   int8
+		IsFromStudent   int8
+		Content         string
+		IsSent          int8
+		SentAt          time.Time
+	}{
+		Ctx:             ctx,
+		MessageThreadID: messageThreadID,
+		IsFromCompany:   isFromCompany,
+		IsFromStudent:   isFromStudent,
+		Content:         content,
+		IsSent:          isSent,
+		SentAt:          sentAt,
+	}
+	mock.lockAddMessage.Lock()
+	mock.calls.AddMessage = append(mock.calls.AddMessage, callInfo)
+	mock.lockAddMessage.Unlock()
+	return mock.AddMessageFunc(ctx, messageThreadID, isFromCompany, isFromStudent, content, isSent, sentAt)
+}
+
+// AddMessageCalls gets all the calls that were made to AddMessage.
+// Check the length with:
+//
+//	len(mockedAddMessageService.AddMessageCalls())
+func (mock *AddMessageServiceMock) AddMessageCalls() []struct {
+	Ctx             context.Context
+	MessageThreadID entity.MessageThreadID
+	IsFromCompany   int8
+	IsFromStudent   int8
+	Content         string
+	IsSent          int8
+	SentAt          time.Time
+} {
+	var calls []struct {
+		Ctx             context.Context
+		MessageThreadID entity.MessageThreadID
+		IsFromCompany   int8
+		IsFromStudent   int8
+		Content         string
+		IsSent          int8
+		SentAt          time.Time
+	}
+	mock.lockAddMessage.RLock()
+	calls = mock.calls.AddMessage
+	mock.lockAddMessage.RUnlock()
 	return calls
 }
