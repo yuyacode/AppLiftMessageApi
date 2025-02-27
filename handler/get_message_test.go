@@ -106,25 +106,21 @@ func TestGetMessage_ServeHTTP(t *testing.T) {
 		r := httptest.NewRequest(http.MethodGet, "/messages?thread_id=1", nil)
 		w := httptest.NewRecorder()
 		gm.ServeHTTP(w, r)
-
 		var messages []message
 		json.Unmarshal(w.Body.Bytes(), &messages)
 		assert.Len(t, messages, 2)
-
 		assert.Equal(t, entity.MessageID(1), messages[0].ID)
 		assert.Equal(t, int8(1), messages[0].IsFromCompany)
 		assert.Equal(t, int8(0), messages[0].IsFromStudent)
 		assert.Equal(t, "normal message from company user", messages[0].Content)
 		assert.Equal(t, int8(1), messages[0].IsSent)
 		assert.Equal(t, time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), messages[0].SentAt)
-
 		assert.Equal(t, entity.MessageID(2), messages[1].ID)
 		assert.Equal(t, int8(0), messages[1].IsFromCompany)
 		assert.Equal(t, int8(1), messages[1].IsFromStudent)
 		assert.Equal(t, "reservation message from student user", messages[1].Content)
 		assert.Equal(t, int8(0), messages[1].IsSent)
 		assert.Equal(t, time.Date(2025, 1, 2, 9, 0, 0, 0, time.UTC), messages[1].SentAt)
-
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
 }
