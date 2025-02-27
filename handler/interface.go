@@ -7,7 +7,7 @@ import (
 	"github.com/yuyacode/AppLiftMessageApi/entity"
 )
 
-//go:generate go run github.com/matryer/moq -out moq_test.go . GetMessageService AddMessageService
+//go:generate go run github.com/matryer/moq -out moq_test.go . RegisterOAuthService RefreshAccessTokenService GetMessageService AddMessageService EditMessageService DeleteMessageService
 
 type VerifyAccessTokenService interface {
 	VerifyAccessToken(ctx context.Context, accessToken string) (string, int64, error)
