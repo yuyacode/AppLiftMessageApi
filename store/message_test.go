@@ -125,3 +125,97 @@ func TestMessageRepository_GetThreadStudentOwner(t *testing.T) {
 		})
 	}
 }
+
+func TestMessageRepository_GetThreadCompanyOwnerByMessageID(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	mr := NewMessageRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		messageID  entity.MessageID
+		mockSetup  func()
+		wantErr    bool
+		wantResult int64
+	}{
+		"DB error": {
+			messageID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT company_user_id\s+FROM message_threads\s+INNER JOIN messages\s+ON message_threads.id = messages.message_thread_id\s+WHERE messages.id = \? AND is_from_company = 1;$`).
+					WithArgs(int64(1)).
+					WillReturnError(assertAnError())
+			},
+			wantErr:    true,
+			wantResult: 0,
+		},
+		"Success": {
+			messageID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT company_user_id\s+FROM message_threads\s+INNER JOIN messages\s+ON message_threads.id = messages.message_thread_id\s+WHERE messages.id = \? AND is_from_company = 1;$`).
+					WithArgs(int64(1)).
+					WillReturnRows(
+						sqlmock.NewRows([]string{"company_user_id"}).AddRow(int64(9999)),
+					)
+			},
+			wantErr:    false,
+			wantResult: 9999,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			got, err := mr.GetThreadCompanyOwnerByMessageID(context.Background(), sqlxDB, tc.messageID)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tc.wantResult, got)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestMessageRepository_GetThreadStudentOwnerByMessageID(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	mr := NewMessageRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		messageID  entity.MessageID
+		mockSetup  func()
+		wantErr    bool
+		wantResult int64
+	}{
+		"DB error": {
+			messageID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT student_user_id\s+FROM message_threads\s+INNER JOIN messages\s+ON message_threads.id = messages.message_thread_id\s+WHERE messages.id = \? AND is_from_student = 1;$`).
+					WithArgs(int64(1)).
+					WillReturnError(assertAnError())
+			},
+			wantErr:    true,
+			wantResult: 0,
+		},
+		"Success": {
+			messageID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT student_user_id\s+FROM message_threads\s+INNER JOIN messages\s+ON message_threads.id = messages.message_thread_id\s+WHERE messages.id = \? AND is_from_student = 1;$`).
+					WithArgs(int64(1)).
+					WillReturnRows(
+						sqlmock.NewRows([]string{"company_user_id"}).AddRow(int64(9999)),
+					)
+			},
+			wantErr:    false,
+			wantResult: 9999,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			got, err := mr.GetThreadStudentOwnerByMessageID(context.Background(), sqlxDB, tc.messageID)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tc.wantResult, got)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
