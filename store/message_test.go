@@ -550,3 +550,44 @@ func TestMessageRepository_EditMessage(t *testing.T) {
 		})
 	}
 }
+
+func TestMessageRepository_DeleteMessage(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	mr := NewMessageRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		messageID entity.MessageID
+		mockSetup func(entity.MessageID)
+		wantErr   bool
+	}{
+		"DB error": {
+			messageID: 1,
+			mockSetup: func(id entity.MessageID) {
+				mock.ExpectExec(`^UPDATE messages SET deleted_at = \? WHERE id = \?;$`).
+					WithArgs(clock.FixedClocker{}.Now(), id).
+					WillReturnError(assertAnError())
+			},
+			wantErr: true,
+		},
+		"Success": {
+			messageID: 2,
+			mockSetup: func(id entity.MessageID) {
+				mock.ExpectExec(`^UPDATE messages SET deleted_at = \? WHERE id = \?;$`).
+					WithArgs(clock.FixedClocker{}.Now(), id).
+					WillReturnResult(sqlmock.NewResult(0, 1)) // InsertID=0, RowsAffected=1
+			},
+			wantErr: false,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup(tc.messageID)
+			err := mr.DeleteMessage(context.Background(), sqlxDB, tc.messageID)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
