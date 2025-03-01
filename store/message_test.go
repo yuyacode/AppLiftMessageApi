@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"testing"
 	"time"
 
@@ -379,6 +381,110 @@ func TestMessageRepository_GetAllMessagesForStudentUser(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tc.wantMessages, got)
+			}
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestMessageRepository_AddMessage(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	mr := NewMessageRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		inputMessage  *entity.Message
+		mockSetup     func(*entity.Message)
+		wantErr       bool
+		wantID        entity.MessageID
+		wantCreatedAt *sql.NullTime
+	}{
+		"DB error on Exec": {
+			inputMessage: &entity.Message{
+				MessageThreadID: 100,
+				IsFromCompany:   1,
+				IsFromStudent:   0,
+				Content:         "Hello",
+				IsSent:          1,
+				SentAt:          time.Date(2025, 1, 1, 12, 0, 0, 0, time.UTC),
+				CreatedAt:       clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(param *entity.Message) {
+				mock.ExpectExec(`^INSERT INTO messages \(message_thread_id, is_from_company, is_from_student, content, is_sent, sent_at, created_at\) VALUES \(\?, \?, \?, \?, \?, \?, \?\);$`).
+					WithArgs(
+						param.MessageThreadID,
+						param.IsFromCompany,
+						param.IsFromStudent,
+						param.Content,
+						param.IsSent,
+						param.SentAt,
+						param.CreatedAt,
+					).
+					WillReturnError(assertAnError())
+			},
+			wantErr: true,
+		},
+		"LastInsertId error": {
+			inputMessage: &entity.Message{
+				MessageThreadID: 200,
+				IsFromCompany:   0,
+				IsFromStudent:   1,
+				Content:         "World",
+				IsSent:          0,
+				SentAt:          time.Date(2025, 2, 1, 10, 30, 0, 0, time.UTC),
+				CreatedAt:       clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(param *entity.Message) {
+				mock.ExpectExec(`^INSERT INTO messages \(message_thread_id, is_from_company, is_from_student, content, is_sent, sent_at, created_at\) VALUES \(\?, \?, \?, \?, \?, \?, \?\);$`).
+					WithArgs(
+						param.MessageThreadID,
+						param.IsFromCompany,
+						param.IsFromStudent,
+						param.Content,
+						param.IsSent,
+						param.SentAt,
+						param.CreatedAt,
+					).
+					WillReturnResult(sqlmock.NewErrorResult(errors.New("cannot get lastInsertID")))
+			},
+			wantErr: true,
+		},
+		"Success": {
+			inputMessage: &entity.Message{
+				MessageThreadID: 300,
+				IsFromCompany:   1,
+				IsFromStudent:   0,
+				Content:         "Success case",
+				IsSent:          1,
+				SentAt:          time.Date(2025, 3, 1, 9, 15, 0, 0, time.UTC),
+				CreatedAt:       clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(param *entity.Message) {
+				mock.ExpectExec(`^INSERT INTO messages \(message_thread_id, is_from_company, is_from_student, content, is_sent, sent_at, created_at\) VALUES \(\?, \?, \?, \?, \?, \?, \?\);$`).
+					WithArgs(
+						param.MessageThreadID,
+						param.IsFromCompany,
+						param.IsFromStudent,
+						param.Content,
+						param.IsSent,
+						param.SentAt,
+						param.CreatedAt,
+					).
+					WillReturnResult(sqlmock.NewResult(999, 1))
+			},
+			wantErr:       false,
+			wantID:        999,
+			wantCreatedAt: clock.FixedClocker{}.Now(),
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup(tc.inputMessage)
+			err := mr.AddMessage(context.Background(), sqlxDB, tc.inputMessage)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantID, tc.inputMessage.ID)
+				assert.Equal(t, tc.wantCreatedAt, tc.inputMessage.CreatedAt)
 			}
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
