@@ -23,7 +23,7 @@ type FixedClocker struct{}
 func (fc FixedClocker) Now() *sql.NullTime {
 	jst := time.FixedZone("JST", 9*60*60)
 	return &sql.NullTime{
-		Time:  time.Date(2024, 7, 20, 12, 33, 56, 0, jst),
+		Time:  time.Date(2025, 1, 1, 9, 0, 0, 0, jst),
 		Valid: true,
 	}
 }
