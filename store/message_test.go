@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
@@ -215,6 +216,170 @@ func TestMessageRepository_GetThreadStudentOwnerByMessageID(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			assert.Equal(t, tc.wantResult, got)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestMessageRepository_GetAllMessagesForCompanyUser(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	mr := NewMessageRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		messageThreadID entity.MessageThreadID
+		mockSetup       func()
+		wantErr         bool
+		wantMessages    entity.Messages
+	}{
+		"DB error": {
+			messageThreadID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT id, is_from_company, is_from_student, content, is_sent, sent_at\s+FROM messages\s+WHERE message_thread_id = \?\s+AND deleted_at IS NULL\s+AND\s+\(\s*\(is_from_company = 1 AND is_sent = 0\)\s+OR \(is_from_company = 1 AND is_sent = 1\)\s+OR \(is_from_student = 1 AND is_sent = 1\)\s*\)\s+ORDER BY sent_at ASC, id ASC;$`).
+					WithArgs(int64(1)).
+					WillReturnError(assertAnError())
+			},
+			wantErr:      true,
+			wantMessages: nil,
+		},
+		"No rows": {
+			messageThreadID: 2,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT id, is_from_company, is_from_student, content, is_sent, sent_at\s+FROM messages\s+WHERE message_thread_id = \?\s+AND deleted_at IS NULL\s+AND\s+\(\s*\(is_from_company = 1 AND is_sent = 0\)\s+OR \(is_from_company = 1 AND is_sent = 1\)\s+OR \(is_from_student = 1 AND is_sent = 1\)\s*\)\s+ORDER BY sent_at ASC, id ASC;$`).
+					WithArgs(int64(2)).
+					WillReturnRows(
+						sqlmock.NewRows([]string{
+							"id", "is_from_company", "is_from_student", "content", "is_sent", "sent_at",
+						}),
+					)
+			},
+			wantErr:      false,
+			wantMessages: nil,
+		},
+		"Multiple rows": {
+			messageThreadID: 3,
+			mockSetup: func() {
+				rows := sqlmock.NewRows([]string{
+					"id", "is_from_company", "is_from_student", "content", "is_sent", "sent_at",
+				}).
+					AddRow(int64(10), int8(1), int8(0), "Hello", int64(1), time.Date(2025, 1, 1, 12, 0, 0, 0, time.FixedZone("JST", 9*60*60))).
+					AddRow(int64(11), int8(0), int8(1), "World", int64(0), time.Date(2025, 1, 1, 12, 5, 0, 0, time.FixedZone("JST", 9*60*60)))
+
+				mock.ExpectQuery(`^SELECT id, is_from_company, is_from_student, content, is_sent, sent_at\s+FROM messages\s+WHERE message_thread_id = \?\s+AND deleted_at IS NULL\s+AND\s+\(\s*\(is_from_company = 1 AND is_sent = 0\)\s+OR \(is_from_company = 1 AND is_sent = 1\)\s+OR \(is_from_student = 1 AND is_sent = 1\)\s*\)\s+ORDER BY sent_at ASC, id ASC;$`).
+					WithArgs(int64(3)).
+					WillReturnRows(rows)
+			},
+			wantErr: false,
+			wantMessages: entity.Messages{
+				&entity.Message{
+					ID:            10,
+					IsFromCompany: 1,
+					IsFromStudent: 0,
+					Content:       "Hello",
+					IsSent:        1,
+					SentAt:        time.Date(2025, 1, 1, 12, 0, 0, 0, time.FixedZone("JST", 9*60*60)),
+				},
+				&entity.Message{
+					ID:            11,
+					IsFromCompany: 0,
+					IsFromStudent: 1,
+					Content:       "World",
+					IsSent:        0,
+					SentAt:        time.Date(2025, 1, 1, 12, 5, 0, 0, time.FixedZone("JST", 9*60*60)),
+				},
+			},
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			got, err := mr.GetAllMessagesForCompanyUser(context.Background(), sqlxDB, tc.messageThreadID)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantMessages, got)
+			}
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestMessageRepository_GetAllMessagesForStudentUser(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	mr := NewMessageRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		messageThreadID entity.MessageThreadID
+		mockSetup       func()
+		wantErr         bool
+		wantMessages    entity.Messages
+	}{
+		"DB error": {
+			messageThreadID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT id, is_from_company, is_from_student, content, is_sent, sent_at\s+FROM messages\s+WHERE message_thread_id = \?\s+AND deleted_at IS NULL\s+AND\s+\(\s*\(is_from_student = 1 AND is_sent = 0\)\s+OR \(is_from_student = 1 AND is_sent = 1\)\s+OR \(is_from_company = 1 AND is_sent = 1\)\s*\)\s+ORDER BY sent_at ASC, id ASC;$`).
+					WithArgs(int64(1)).
+					WillReturnError(assertAnError())
+			},
+			wantErr:      true,
+			wantMessages: nil,
+		},
+		"No rows": {
+			messageThreadID: 2,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT id, is_from_company, is_from_student, content, is_sent, sent_at\s+FROM messages\s+WHERE message_thread_id = \?\s+AND deleted_at IS NULL\s+AND\s+\(\s*\(is_from_student = 1 AND is_sent = 0\)\s+OR \(is_from_student = 1 AND is_sent = 1\)\s+OR \(is_from_company = 1 AND is_sent = 1\)\s*\)\s+ORDER BY sent_at ASC, id ASC;$`).
+					WithArgs(int64(2)).
+					WillReturnRows(
+						sqlmock.NewRows([]string{
+							"id", "is_from_company", "is_from_student", "content", "is_sent", "sent_at",
+						}),
+					)
+			},
+			wantErr:      false,
+			wantMessages: nil,
+		},
+		"Multiple rows": {
+			messageThreadID: 3,
+			mockSetup: func() {
+				rows := sqlmock.NewRows([]string{
+					"id", "is_from_company", "is_from_student", "content", "is_sent", "sent_at",
+				}).
+					AddRow(int64(10), int8(1), int8(0), "Hello", int64(1), time.Date(2025, 1, 1, 12, 0, 0, 0, time.FixedZone("JST", 9*60*60))).
+					AddRow(int64(11), int8(0), int8(1), "World", int64(0), time.Date(2025, 1, 1, 12, 5, 0, 0, time.FixedZone("JST", 9*60*60)))
+
+				mock.ExpectQuery(`^SELECT id, is_from_company, is_from_student, content, is_sent, sent_at\s+FROM messages\s+WHERE message_thread_id = \?\s+AND deleted_at IS NULL\s+AND\s+\(\s*\(is_from_student = 1 AND is_sent = 0\)\s+OR \(is_from_student = 1 AND is_sent = 1\)\s+OR \(is_from_company = 1 AND is_sent = 1\)\s*\)\s+ORDER BY sent_at ASC, id ASC;$`).
+					WithArgs(int64(3)).
+					WillReturnRows(rows)
+			},
+			wantErr: false,
+			wantMessages: entity.Messages{
+				&entity.Message{
+					ID:            10,
+					IsFromCompany: 1,
+					IsFromStudent: 0,
+					Content:       "Hello",
+					IsSent:        1,
+					SentAt:        time.Date(2025, 1, 1, 12, 0, 0, 0, time.FixedZone("JST", 9*60*60)),
+				},
+				&entity.Message{
+					ID:            11,
+					IsFromCompany: 0,
+					IsFromStudent: 1,
+					Content:       "World",
+					IsSent:        0,
+					SentAt:        time.Date(2025, 1, 1, 12, 5, 0, 0, time.FixedZone("JST", 9*60*60)),
+				},
+			},
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			got, err := mr.GetAllMessagesForStudentUser(context.Background(), sqlxDB, tc.messageThreadID)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantMessages, got)
+			}
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
