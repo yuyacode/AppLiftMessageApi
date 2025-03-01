@@ -490,3 +490,63 @@ func TestMessageRepository_AddMessage(t *testing.T) {
 		})
 	}
 }
+
+func TestMessageRepository_EditMessage(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	mr := NewMessageRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		inputMessage  *entity.Message
+		mockSetup     func(*entity.Message)
+		wantErr       bool
+		wantUpdatedAt *sql.NullTime
+	}{
+		"DB error on Exec": {
+			inputMessage: &entity.Message{
+				ID:        1,
+				Content:   "Before Update - DB error",
+				UpdatedAt: clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(m *entity.Message) {
+				mock.ExpectExec(`^UPDATE messages SET content = \?, updated_at = \? WHERE id = \?;$`).
+					WithArgs(
+						m.Content,
+						m.UpdatedAt,
+						m.ID,
+					).
+					WillReturnError(assertAnError())
+			},
+			wantErr: true,
+		},
+		"Success": {
+			inputMessage: &entity.Message{
+				ID:        2,
+				Content:   "Update Content",
+				UpdatedAt: clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(m *entity.Message) {
+				mock.ExpectExec(`^UPDATE messages SET content = \?, updated_at = \? WHERE id = \?;$`).
+					WithArgs(
+						m.Content,
+						m.UpdatedAt,
+						m.ID,
+					).
+					WillReturnResult(sqlmock.NewResult(0, 1)) // InsertID=0, RowsAffected=1
+			},
+			wantErr:       false,
+			wantUpdatedAt: clock.FixedClocker{}.Now(),
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup(tc.inputMessage)
+			err := mr.EditMessage(context.Background(), sqlxDB, tc.inputMessage)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantUpdatedAt, tc.inputMessage.UpdatedAt)
+			}
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
