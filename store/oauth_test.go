@@ -358,3 +358,58 @@ func TestOAuthRepository_SearchByClientSecret(t *testing.T) {
 		})
 	}
 }
+
+func TestOAuthRepository_SearchByAccessToken(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	or := NewOAuthRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		accessToken string
+		mockSetup   func()
+		wantFound   bool
+		wantErr     bool
+	}{
+		"DB error": {
+			accessToken: "some_access_token",
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT 1 FROM message_api_credentials WHERE access_token = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs("some_access_token").
+					WillReturnError(assertAnError())
+			},
+			wantFound: false,
+			wantErr:   true,
+		},
+		"No rows": {
+			accessToken: "nonexistent_token",
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT 1 FROM message_api_credentials WHERE access_token = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs("nonexistent_token").
+					WillReturnRows(sqlmock.NewRows([]string{"1"}))
+			},
+			wantFound: false,
+			wantErr:   false,
+		},
+		"Found row": {
+			accessToken: "existing_token",
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT 1 FROM message_api_credentials WHERE access_token = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs("existing_token").
+					WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
+			},
+			wantFound: true,
+			wantErr:   false,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			gotFound, err := or.SearchByAccessToken(context.Background(), sqlxDB, tc.accessToken)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tc.wantFound, gotFound)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
