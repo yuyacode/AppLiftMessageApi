@@ -303,3 +303,58 @@ func TestOAuthRepository_SearchByClientID(t *testing.T) {
 		})
 	}
 }
+
+func TestOAuthRepository_SearchByClientSecret(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	or := NewOAuthRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		clientSecret string
+		mockSetup    func()
+		wantExist    bool
+		wantErr      bool
+	}{
+		"DB error": {
+			clientSecret: "client_secret_123",
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT 1 FROM message_api_credentials WHERE client_secret = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs("client_secret_123").
+					WillReturnError(assertAnError())
+			},
+			wantExist: false,
+			wantErr:   true,
+		},
+		"No rows": {
+			clientSecret: "non_exist_client_secret",
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT 1 FROM message_api_credentials WHERE client_secret = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs("non_exist_client_secret").
+					WillReturnRows(sqlmock.NewRows([]string{"1"}))
+			},
+			wantExist: false,
+			wantErr:   false,
+		},
+		"Found row": {
+			clientSecret: "exist_client_secret",
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT 1 FROM message_api_credentials WHERE client_secret = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs("exist_client_secret").
+					WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
+			},
+			wantExist: true,
+			wantErr:   false,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			gotExist, err := or.SearchByClientSecret(context.Background(), sqlxDB, tc.clientSecret)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tc.wantExist, gotExist)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
