@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/yuyacode/AppLiftMessageApi/clock"
+	"github.com/yuyacode/AppLiftMessageApi/entity"
 )
 
 func TestOAuthRepository_GetAPIKey(t *testing.T) {
@@ -464,6 +465,67 @@ func TestOAuthRepository_SearchByRefreshToken(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			assert.Equal(t, tc.wantFound, gotFound)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestOAuthRepository_SaveClientIDSecret(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	or := NewOAuthRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		inputParam *entity.MessageAPICredential
+		mockSetup  func(*entity.MessageAPICredential)
+		wantErr    bool
+	}{
+		"DB error": {
+			inputParam: &entity.MessageAPICredential{
+				UserID:       1,
+				ClientID:     "CLIENT_ID",
+				ClientSecret: "CLIENT_SECRET",
+				CreatedAt:    clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(param *entity.MessageAPICredential) {
+				mock.ExpectExec(`^INSERT INTO message_api_credentials \(user_id, client_id, client_secret, created_at\) VALUES \(\?, \?, \?, \?\);$`).
+					WithArgs(
+						param.UserID,
+						param.ClientID,
+						param.ClientSecret,
+						param.CreatedAt,
+					).
+					WillReturnError(assertAnError())
+			},
+			wantErr: true,
+		},
+		"Success": {
+			inputParam: &entity.MessageAPICredential{
+				UserID:       1,
+				ClientID:     "CLIENT_ID",
+				ClientSecret: "CLIENT_SECRET",
+				CreatedAt:    clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(param *entity.MessageAPICredential) {
+				mock.ExpectExec(`^INSERT INTO message_api_credentials \(user_id, client_id, client_secret, created_at\) VALUES \(\?, \?, \?, \?\);$`).
+					WithArgs(
+						param.UserID,
+						param.ClientID,
+						param.ClientSecret,
+						param.CreatedAt,
+					).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			wantErr: false,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup(tc.inputParam)
+			err := or.SaveClientIDSecret(context.Background(), sqlxDB, tc.inputParam)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
