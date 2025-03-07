@@ -95,3 +95,48 @@ func TestOAuthRepository_GetClientID(t *testing.T) {
 		})
 	}
 }
+
+func TestOAuthRepository_GetClientSecret(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	or := NewOAuthRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		userID           int64
+		mockSetup        func()
+		wantErr          bool
+		wantClientSecret string
+	}{
+		"DB error": {
+			userID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT client_secret FROM message_api_credentials WHERE user_id = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs(int64(1)).
+					WillReturnError(assertAnError())
+			},
+			wantErr:          true,
+			wantClientSecret: "",
+		},
+		"Success": {
+			userID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT client_secret FROM message_api_credentials WHERE user_id = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs(int64(1)).
+					WillReturnRows(sqlmock.NewRows([]string{"client_secret"}).AddRow("SECRET_CLIENT_SECRET"))
+			},
+			wantErr:          false,
+			wantClientSecret: "SECRET_CLIENT_SECRET",
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			got, err := or.GetClientSecret(context.Background(), sqlxDB, tc.userID)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tc.wantClientSecret, got)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
