@@ -530,3 +530,68 @@ func TestOAuthRepository_SaveClientIDSecret(t *testing.T) {
 		})
 	}
 }
+
+func TestOAuthRepository_SaveToken(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	or := NewOAuthRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		inputCredential *entity.MessageAPICredential
+		mockSetup       func(*entity.MessageAPICredential)
+		wantErr         bool
+	}{
+		"DB error": {
+			inputCredential: &entity.MessageAPICredential{
+				UserID:       1,
+				AccessToken:  "OLD_ACCESS",
+				RefreshToken: "OLD_REFRESH",
+				ExpiresAt:    clock.FixedClocker{}.Now(),
+				UpdatedAt:    clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(param *entity.MessageAPICredential) {
+				mock.ExpectExec(`^UPDATE message_api_credentials SET access_token = \?, refresh_token = \?, expires_at = \?, updated_at = \? WHERE user_id = \?;$`).
+					WithArgs(
+						param.AccessToken,
+						param.RefreshToken,
+						param.ExpiresAt,
+						param.UpdatedAt,
+						param.UserID,
+					).
+					WillReturnError(assertAnError())
+			},
+			wantErr: true,
+		},
+		"Success": {
+			inputCredential: &entity.MessageAPICredential{
+				UserID:       1,
+				AccessToken:  "NEW_ACCESS",
+				RefreshToken: "NEW_REFRESH",
+				ExpiresAt:    clock.FixedClocker{}.Now(),
+				UpdatedAt:    clock.FixedClocker{}.Now(),
+			},
+			mockSetup: func(param *entity.MessageAPICredential) {
+				mock.ExpectExec(`^UPDATE message_api_credentials SET access_token = \?, refresh_token = \?, expires_at = \?, updated_at = \? WHERE user_id = \?;$`).
+					WithArgs(
+						param.AccessToken,
+						param.RefreshToken,
+						param.ExpiresAt,
+						param.UpdatedAt,
+						param.UserID,
+					).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			wantErr: false,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup(tc.inputCredential)
+			err := or.SaveToken(context.Background(), sqlxDB, tc.inputCredential)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
