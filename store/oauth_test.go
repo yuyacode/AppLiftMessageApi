@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -136,6 +138,65 @@ func TestOAuthRepository_GetClientSecret(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			assert.Equal(t, tc.wantClientSecret, got)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestOAuthRepository_GetAccessToken(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	or := NewOAuthRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		userID          int64
+		mockSetup       func()
+		wantErr         bool
+		wantAccessToken string
+		wantExpiresAt   *sql.NullTime
+	}{
+		"DB error": {
+			userID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT access_token, expires_at FROM message_api_credentials WHERE user_id = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs(int64(1)).
+					WillReturnError(assertAnError())
+			},
+			wantErr:         true,
+			wantAccessToken: "",
+			wantExpiresAt:   &sql.NullTime{},
+		},
+		"Success": {
+			userID: 2,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT access_token, expires_at FROM message_api_credentials WHERE user_id = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs(int64(2)).
+					WillReturnRows(
+						sqlmock.NewRows([]string{"access_token", "expires_at"}).
+							AddRow("ACCESS_TOKEN_VALID", time.Date(2025, 1, 1, 12, 34, 56, 0, time.UTC)),
+					)
+			},
+			wantErr:         false,
+			wantAccessToken: "ACCESS_TOKEN_VALID",
+			wantExpiresAt: &sql.NullTime{
+				Time:  time.Date(2025, 1, 1, 12, 34, 56, 0, time.UTC),
+				Valid: true,
+			},
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			gotToken, gotExpiresAt, err := or.GetAccessToken(context.Background(), sqlxDB, tc.userID)
+			if tc.wantErr {
+				assert.Error(t, err)
+				assert.Empty(t, gotToken)
+				assert.NotNil(t, gotExpiresAt)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.wantAccessToken, gotToken)
+				require.NotNil(t, gotExpiresAt)
+				assert.Equal(t, tc.wantExpiresAt.Valid, gotExpiresAt.Valid)
+				assert.Equal(t, tc.wantExpiresAt.Time, gotExpiresAt.Time)
+			}
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
