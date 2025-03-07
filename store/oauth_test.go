@@ -201,3 +201,50 @@ func TestOAuthRepository_GetAccessToken(t *testing.T) {
 		})
 	}
 }
+
+func TestOAuthRepository_GetRefreshToken(t *testing.T) {
+	sqlxDB, mock := newMockDB(t)
+	or := NewOAuthRepository(clock.FixedClocker{})
+	tests := map[string]struct {
+		userID           int64
+		mockSetup        func()
+		wantErr          bool
+		wantRefreshToken string
+	}{
+		"DB error": {
+			userID: 1,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT refresh_token FROM message_api_credentials WHERE user_id = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs(int64(1)).
+					WillReturnError(assertAnError())
+			},
+			wantErr:          true,
+			wantRefreshToken: "",
+		},
+		"Success": {
+			userID: 2,
+			mockSetup: func() {
+				mock.ExpectQuery(`^SELECT refresh_token FROM message_api_credentials WHERE user_id = \? AND deleted_at IS NULL LIMIT 1;$`).
+					WithArgs(int64(2)).
+					WillReturnRows(
+						sqlmock.NewRows([]string{"refresh_token"}).AddRow("REFRESH_TOKEN_VALID"),
+					)
+			},
+			wantErr:          false,
+			wantRefreshToken: "REFRESH_TOKEN_VALID",
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			tc.mockSetup()
+			got, err := or.GetRefreshToken(context.Background(), sqlxDB, tc.userID)
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tc.wantRefreshToken, got)
+			require.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
