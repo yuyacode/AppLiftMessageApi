@@ -20,5 +20,4 @@ jobs:
           golangci_lint_flags: "--config=./.github/workflows/config/golangci-lint.yaml ./..."
           level: error
           reporter: github-pr-check
-          filter_mode: nofilter
           go_version_file: go.mod
