@@ -1,0 +1,115 @@
+name: cloudformation-cicd
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  cfn-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install cfn-lint
+        run: pip install cfn-lint
+
+      - name: Add cfn-lint problem matcher
+        run: echo "::add-matcher::.github/cfn-lint.json"
+
+      - name: Run cfn-lint
+        run: |
+          files="cloudformation/ecr.yaml"
+          for file in $files; do
+            cfn-lint "$file" -f parseable
+          done
+
+  cfn-nag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.2'
+
+      - name: Install cfn-nag
+        run: gem install cfn-nag
+
+      - name: Run cfn-nag
+        run: |
+          files="cloudformation/ecr.yaml"
+          for file in $files; do
+            cfn_nag "$file"
+          done
+
+  # deploy-ecr:
+  #   needs: [cfn-lint, cfn-nag]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: ${{ secrets.ECR_REPOSITORY_DEPLOYMENT_ROLE_ARN }}
+  #         aws-region: ap-northeast-1
+
+  #     - name: Deploy ECR
+  #       run: |
+  #         aws cloudformation deploy \
+  #           --template-file cloudformation/ecr.yaml \
+  #           --stack-name Message-API-ECR \
+
+  # build_and_push_image:
+  #   needs: [deploy-ecr]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: ${{ secrets.ECR_IMAGE_PUSH_ROLE_ARN }}
+  #         aws-region: ap-northeast-1
+
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v2
+
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+
+  #     - name: Build and push image to Amazon ECR (ARM64)
+  #       env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}  # secret後で登録する
+  #         IMAGE_TAG: ${{ github.sha }}
+  #       run: |
+  #         IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+  #         IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+  #         echo "Building and pushing ARM64 image: $IMAGE_URI_WITH_TAG and $IMAGE_URI_LATEST"
+  #         docker buildx build \
+  #           --platform linux/arm64 \
+  #           --tag $IMAGE_URI_WITH_TAG \
+  #           --tag $IMAGE_URI_LATEST \
+  #           --file dockerfile.prod \
+  #           . \
+  #           --push
+
+  #     - name: Notify deployment success
+  #       run: echo "Successfully pushed ARM64 image ${{ github.sha }} (and latest) to ECR repository ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}"
