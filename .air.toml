@@ -12,7 +12,6 @@ cmd = "tmp/main"
 [watch]
 dir = "."
 exclude_dir = ["vendor", "tmp"]
-
 include_ext = ["go"]
 exclude_ext = ["tmp"]
 
