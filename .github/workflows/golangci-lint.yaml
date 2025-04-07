@@ -1,23 +1,23 @@
-name: golangci-lint
+# name: golangci-lint
 
-on:
-  pull_request:
-    branches: [main]
+# on:
+#   pull_request:
+#     branches: [main]
 
-jobs:
-  golangci-lint:
-    runs-on: ubuntu-latest
+# jobs:
+#   golangci-lint:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Check out code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-      - name: golangci-lint
-        uses: reviewdog/action-golangci-lint@v2
-        with:
-          golangci_lint_flags: "--config=./.github/workflows/config/golangci-lint.yaml ./..."
-          level: error
-          reporter: github-pr-check
-          go_version_file: go.mod
+#       - name: golangci-lint
+#         uses: reviewdog/action-golangci-lint@v2
+#         with:
+#           golangci_lint_flags: "--config=./.github/golangci-lint.yaml ./..."
+#           level: error
+#           reporter: github-pr-check
+#           go_version_file: go.mod

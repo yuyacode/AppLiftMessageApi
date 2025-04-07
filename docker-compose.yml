@@ -2,7 +2,7 @@ services:
   message-api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile.dev
     ports:
       - "8080:8080"
     volumes:

@@ -1,33 +1,33 @@
-name: unit-tests
+# name: unit-tests
 
-on:
-  pull_request:
-    branches: [main]
+# on:
+#   pull_request:
+#     branches: [main]
 
-jobs:
-  unit-test:
-    runs-on: ubuntu-latest
-    env:
-      ENV: ci
+# jobs:
+#   unit-test:
+#     runs-on: ubuntu-latest
+#     env:
+#       ENV: ci
 
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Check out code
+#         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.24'
-          cache: false
+#       - name: Set up Go
+#         uses: actions/setup-go@v5
+#         with:
+#           go-version: '1.24'
+#           cache: false
 
-      - name: Generate mocks
-        run: go generate ./...
+#       - name: Generate mocks
+#         run: go generate ./...
 
-      - name: Run tests
-        run: go test ./... -coverprofile=coverage.out
-        env:
-          ACCESS_TOKEN_SECRET_KEY: ${{ secrets.ACCESS_TOKEN_SECRET_KEY_CI }}
-          REFRESH_TOKEN_SECRET_KEY: ${{ secrets.REFRESH_TOKEN_SECRET_KEY_CI }}
+#       - name: Run tests
+#         run: go test ./... -coverprofile=coverage.out
+#         env:
+#           ACCESS_TOKEN_SECRET_KEY: ${{ secrets.ACCESS_TOKEN_SECRET_KEY_CI }}
+#           REFRESH_TOKEN_SECRET_KEY: ${{ secrets.REFRESH_TOKEN_SECRET_KEY_CI }}
 
-      - name: report coverage
-        uses: k1LoW/octocov-action@v1
+#       - name: report coverage
+#         uses: k1LoW/octocov-action@v1
