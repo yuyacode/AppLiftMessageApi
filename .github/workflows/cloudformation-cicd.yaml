@@ -28,7 +28,7 @@ jobs:
 
       - name: Run cfn-lint
         run: |
-          files="cloudformation/ecr.yaml cloudformation/cloudwatch.yaml"
+          files="cloudformation/ecr.yaml cloudformation/cloudwatch.yaml cloudformation/role.yaml"
           for file in $files; do
             cfn-lint "$file" -f parseable
           done
@@ -49,7 +49,7 @@ jobs:
 
       - name: Run cfn-nag
         run: |
-          files="cloudformation/ecr.yaml cloudformation/cloudwatch.yaml"
+          files="cloudformation/ecr.yaml cloudformation/cloudwatch.yaml cloudformation/role.yaml"
           for file in $files; do
             cfn_nag "$file"
           done
