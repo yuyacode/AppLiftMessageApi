@@ -74,7 +74,7 @@ jobs:
   #           --stack-name Message-API-Log-Group
   
   # deploy-ecr:
-  #   needs: [deploy-log_group]
+  #   needs: [cfn-lint, cfn-nag]
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout
