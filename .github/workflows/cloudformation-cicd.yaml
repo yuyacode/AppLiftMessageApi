@@ -28,7 +28,7 @@ jobs:
 
       - name: Run cfn-lint
         run: |
-          files="cloudformation/ecr.yaml cloudformation/cloudwatch.yaml"
+          files="cloudformation/ecr.yaml cloudformation/cloudwatch.yaml cloudformation/role.yaml"
           for file in $files; do
             cfn-lint "$file" -f parseable
           done
@@ -49,7 +49,7 @@ jobs:
 
       - name: Run cfn-nag
         run: |
-          files="cloudformation/ecr.yaml cloudformation/cloudwatch.yaml"
+          files="cloudformation/ecr.yaml cloudformation/cloudwatch.yaml cloudformation/role.yaml"
           for file in $files; do
             cfn_nag "$file"
           done
@@ -74,7 +74,7 @@ jobs:
             --stack-name Message-API-Log-Group
   
   deploy-ecr:
-    needs: [deploy-log_group]
+    needs: [cfn-lint, cfn-nag]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -92,58 +92,78 @@ jobs:
             --template-file cloudformation/ecr.yaml \
             --stack-name Message-API-ECR \
 
-  build_and_push_image:
-    needs: [deploy-ecr]
+  # build_and_push_image:
+  #   needs: [deploy-ecr]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: ${{ secrets.ECR_IMAGE_PUSH_ROLE_ARN }}
+  #         aws-region: ap-northeast-1
+
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v2
+
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+
+  #     - name: Build image (ARM64) and load to Docker daemon
+  #       env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}
+  #         IMAGE_TAG: ${{ github.sha }}
+  #       run: |
+  #         IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+  #         IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+  #         echo "Building ARM64 image with tags: $IMAGE_URI_WITH_TAG and $IMAGE_URI_LATEST"
+  #         docker buildx build \
+  #           --platform linux/arm64 \
+  #           --tag $IMAGE_URI_WITH_TAG \
+  #           --tag $IMAGE_URI_LATEST \
+  #           --file dockerfile.prod \
+  #           . \
+  #           --load
+
+  #     - name: Push images to Amazon ECR
+  #       env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}
+  #         IMAGE_TAG: ${{ github.sha }}
+  #       run: |
+  #         IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+  #         IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+  #         echo "Pushing image: $IMAGE_URI_WITH_TAG"
+  #         docker push $IMAGE_URI_WITH_TAG
+
+  #         echo "Pushing image: $IMAGE_URI_LATEST"
+  #         docker push $IMAGE_URI_LATEST
+
+  #     - name: Notify deployment success
+  #       run: echo "Successfully pushed ARM64 image ${{ github.sha }} (and latest) to ECR repository ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}"
+
+  deploy-role:
+    needs: [cfn-lint, cfn-nag]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.ECR_IMAGE_PUSH_ROLE_ARN }}
+          role-to-assume: ${{ secrets.IAM_ROLE_STACK_DEPLOYMENT_ROLE_ARN }}
           aws-region: ap-northeast-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build image (ARM64) and load to Docker daemon
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}
-          IMAGE_TAG: ${{ github.sha }}
+      - name: Deploy Role
         run: |
-          IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
-          echo "Building ARM64 image with tags: $IMAGE_URI_WITH_TAG and $IMAGE_URI_LATEST"
-          docker buildx build \
-            --platform linux/arm64 \
-            --tag $IMAGE_URI_WITH_TAG \
-            --tag $IMAGE_URI_LATEST \
-            --file dockerfile.prod \
-            . \
-            --load
-
-      - name: Push images to Amazon ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
-          echo "Pushing image: $IMAGE_URI_WITH_TAG"
-          docker push $IMAGE_URI_WITH_TAG
-
-          echo "Pushing image: $IMAGE_URI_LATEST"
-          docker push $IMAGE_URI_LATEST
-
-      - name: Notify deployment success
-        run: echo "Successfully pushed ARM64 image ${{ github.sha }} (and latest) to ECR repository ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}"
+          aws cloudformation deploy \
+            --template-file cloudformation/role.yaml \
+            --stack-name Message-API-Role \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
