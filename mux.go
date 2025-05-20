@@ -46,6 +46,10 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	dmHandler := handler.NewDeleteMessage(dmService, v)
 	mux := chi.NewRouter()
 	mux.Use(handler.CORSMiddleware())
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_, _ = w.Write([]byte(`{"status": "ok"}`))
+	})
 	mux.Route("/messages", func(r chi.Router) {
 		r.Post("/register", roHandler.ServeHTTP)
 		r.Group(func(r chi.Router) {
