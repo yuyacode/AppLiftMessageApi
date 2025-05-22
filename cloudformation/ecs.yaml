@@ -83,10 +83,10 @@ Resources:
                 Fn::Sub: "${DBStackName}-MasterSecretARN:password"
             - Name: ACCESS_TOKEN_SECRET_KEY
               ValueFrom: !ImportValue
-                Fn::Sub: "${SecretsManagerStackName}-AccessTokenSecretKeyArn"
+                Fn::Sub: "${SecretsManagerStackName}-AccessTokenSecretKeyArn:key"
             - Name: REFRESH_TOKEN_SECRET_KEY
               ValueFrom: !ImportValue
-                Fn::Sub: "${SecretsManagerStackName}-RefreshTokenSecretKeyArn"
+                Fn::Sub: "${SecretsManagerStackName}-RefreshTokenSecretKeyArn:key"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
