@@ -72,7 +72,7 @@ jobs:
           aws cloudformation deploy \
             --template-file cloudformation/cloudwatch.yaml \
             --stack-name Message-API-Log-Group
-  
+
   deploy-ecr:
     needs: [cfn-lint, cfn-nag]
     runs-on: ubuntu-latest
