@@ -28,6 +28,8 @@ Resources:
     Metadata:
       cfn_nag:
         rules_to_suppress:
+          - id: W11
+            reason: "ssmmessages actions do not support resource-level permissions. only these four actions are granted for ECS Exec (minimum required)."
           - id: W28
             reason: "Defined role name required for operational clarity and simplified referencing. Potential replacement risks are understood."
 
