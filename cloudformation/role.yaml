@@ -37,3 +37,5 @@ Outputs:
   ECSTaskRoleArn:
     Description: ARN of the ECS Task Role for AppLiftMessageAPI
     Value: !GetAtt ECSTaskRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-ECSTaskRoleArn"
