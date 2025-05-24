@@ -54,43 +54,43 @@ jobs:
             cfn_nag "$file"
           done
 
-  # deploy-log_group:
-  #   needs: [cfn-lint, cfn-nag]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  deploy-log_group:
+    needs: [cfn-lint, cfn-nag]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         role-to-assume: ${{ secrets.LOG_GROUP_DEPLOYMENT_ROLE_ARN }}
-  #         aws-region: ap-northeast-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LOG_GROUP_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ap-northeast-1
 
-  #     - name: Deploy Log Group
-  #       run: |
-  #         aws cloudformation deploy \
-  #           --template-file cloudformation/cloudwatch.yaml \
-  #           --stack-name Message-API-Log-Group
-  
-  # deploy-ecr:
-  #   needs: [cfn-lint, cfn-nag]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+      - name: Deploy Log Group
+        run: |
+          aws cloudformation deploy \
+            --template-file cloudformation/cloudwatch.yaml \
+            --stack-name Message-API-Log-Group
 
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         role-to-assume: ${{ secrets.ECR_REPOSITORY_DEPLOYMENT_ROLE_ARN }}
-  #         aws-region: ap-northeast-1
+  deploy-ecr:
+    needs: [cfn-lint, cfn-nag]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Deploy ECR
-  #       run: |
-  #         aws cloudformation deploy \
-  #           --template-file cloudformation/ecr.yaml \
-  #           --stack-name Message-API-ECR \
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ECR_REPOSITORY_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Deploy ECR
+        run: |
+          aws cloudformation deploy \
+            --template-file cloudformation/ecr.yaml \
+            --stack-name Message-API-ECR \
 
   # build_and_push_image:
   #   needs: [deploy-ecr]
@@ -148,22 +148,22 @@ jobs:
   #     - name: Notify deployment success
   #       run: echo "Successfully pushed ARM64 image ${{ github.sha }} (and latest) to ECR repository ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}"
 
-  # deploy-role:
-  #   needs: [cfn-lint, cfn-nag]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  deploy-role:
+    needs: [cfn-lint, cfn-nag]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         role-to-assume: ${{ secrets.IAM_ROLE_STACK_DEPLOYMENT_ROLE_ARN }}
-  #         aws-region: ap-northeast-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_STACK_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ap-northeast-1
 
-  #     - name: Deploy Role
-  #       run: |
-  #         aws cloudformation deploy \
-  #           --template-file cloudformation/role.yaml \
-  #           --stack-name Message-API-Role \
-  #           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
+      - name: Deploy Role
+        run: |
+          aws cloudformation deploy \
+            --template-file cloudformation/role.yaml \
+            --stack-name Message-API-Role \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
