@@ -67,7 +67,7 @@ Resources:
             - Name: DB_COMMON
               Value: common
             # - Name: ALLOWED_ORIGIN
-            #   Value:   # 後で設定する
+            #   Value: set_later
           Secrets:
             - Name: DB_HOST
               ValueFrom: !Sub
