@@ -117,64 +117,60 @@ jobs:
     outputs:
       image_tag: ${{ steps.build_image.outputs.image_tag }}
     steps:
-      # - name: Checkout repository
-      #   uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     role-to-assume: ${{ secrets.ECR_IMAGE_PUSH_ROLE_ARN }}
-      #     aws-region: ap-northeast-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ECR_IMAGE_PUSH_ROLE_ARN }}
+          aws-region: ap-northeast-1
 
-      # - name: Login to Amazon ECR
-      #   id: login-ecr
-      #   uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      # - name: Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build image (ARM64) and load to Docker daemon
         id: build_image
         env:
-          # ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          # ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}
-          # IMAGE_TAG: ${{ github.sha }}
-          IMAGE_TAG: 1dbd208d9beecfccd7887ca88168859fe0a34d26
-        # run: |
-        #   IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-        #   IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-
-        #   echo "Building ARM64 image with tags: $IMAGE_URI_WITH_TAG and $IMAGE_URI_LATEST"
-        #   docker buildx build \
-        #     --platform linux/arm64 \
-        #     --tag $IMAGE_URI_WITH_TAG \
-        #     --tag $IMAGE_URI_LATEST \
-        #     --file dockerfile.prod \
-        #     . \
-        #     --load
-
-        #   echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
-        
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
+          IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+          echo "Building ARM64 image with tags: $IMAGE_URI_WITH_TAG and $IMAGE_URI_LATEST"
+          docker buildx build \
+            --platform linux/arm64 \
+            --tag $IMAGE_URI_WITH_TAG \
+            --tag $IMAGE_URI_LATEST \
+            --file dockerfile.prod \
+            . \
+            --load
+
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # - name: Push images to Amazon ECR
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}
-      #     IMAGE_TAG: ${{ github.sha }}
-      #   run: |
-      #     IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-      #     IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+      - name: Push images to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE_URI_WITH_TAG="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
-      #     echo "Pushing image: $IMAGE_URI_WITH_TAG"
-      #     docker push $IMAGE_URI_WITH_TAG
+          echo "Pushing image: $IMAGE_URI_WITH_TAG"
+          docker push $IMAGE_URI_WITH_TAG
 
-      #     echo "Pushing image: $IMAGE_URI_LATEST"
-      #     docker push $IMAGE_URI_LATEST
+          echo "Pushing image: $IMAGE_URI_LATEST"
+          docker push $IMAGE_URI_LATEST
 
-      # - name: Notify deployment success
-      #   run: echo "Successfully pushed ARM64 image ${{ github.sha }} (and latest) to ECR repository ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}"
+      - name: Notify deployment success
+        run: echo "Successfully pushed ARM64 image ${{ github.sha }} (and latest) to ECR repository ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}"
 
   # ───────────────────────────────────────────────────────────────
   # 【事前準備】ECSサービス用Service-Linked-Roleの作成
