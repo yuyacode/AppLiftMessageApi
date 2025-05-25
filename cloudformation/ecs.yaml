@@ -87,10 +87,10 @@ Resources:
                 - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
             - Name: ACCESS_TOKEN_SECRET_KEY
               ValueFrom: !ImportValue
-                Fn::Sub: "${SecretsManagerStackName}-AccessTokenSecretKeyArn:key"
+                Fn::Sub: "${SecretsManagerStackName}-AccessTokenSecretKeyArn"
             - Name: REFRESH_TOKEN_SECRET_KEY
               ValueFrom: !ImportValue
-                Fn::Sub: "${SecretsManagerStackName}-RefreshTokenSecretKeyArn:key"
+                Fn::Sub: "${SecretsManagerStackName}-RefreshTokenSecretKeyArn"
   ECSService:
     Type: AWS::ECS::Service
     Properties:
