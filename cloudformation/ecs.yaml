@@ -70,17 +70,21 @@ Resources:
             #   Value:   # 後で設定する
           Secrets:
             - Name: DB_HOST
-              ValueFrom: !ImportValue
-                Fn::Sub: "${DBStackName}-MasterSecretARN:host"
+              ValueFrom: !Sub
+                - "${SecretArn}:host::"
+                - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
             - Name: DB_PORT
-              ValueFrom: !ImportValue
-                Fn::Sub: "${DBStackName}-MasterSecretARN:port"
+              ValueFrom: !Sub
+                - "${SecretArn}:port::"
+                - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
             - Name: DB_USERNAME
-              ValueFrom: !ImportValue
-                Fn::Sub: "${DBStackName}-MasterSecretARN:username"
+              ValueFrom: !Sub
+                - "${SecretArn}:username::"
+                - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
             - Name: DB_PASSWORD
-              ValueFrom: !ImportValue
-                Fn::Sub: "${DBStackName}-MasterSecretARN:password"
+              ValueFrom: !Sub
+                - "${SecretArn}:password::"
+                - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
             - Name: ACCESS_TOKEN_SECRET_KEY
               ValueFrom: !ImportValue
                 Fn::Sub: "${SecretsManagerStackName}-AccessTokenSecretKeyArn:key"
