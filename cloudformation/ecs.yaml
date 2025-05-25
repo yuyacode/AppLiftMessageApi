@@ -71,20 +71,32 @@ Resources:
           Secrets:
             - Name: DB_HOST
               ValueFrom: !Sub
-                - "${SecretArn}:host::"
-                - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
+                - "${ImportedArn}:host::"
+                - ImportedArn: !ImportValue
+                    Fn::Sub:
+                      - "${DBStackName}-MasterSecretARN"
+                      - { DBStackName: !Ref DBStackName }
             - Name: DB_PORT
               ValueFrom: !Sub
-                - "${SecretArn}:port::"
-                - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
+                - "${ImportedArn}:port::"
+                - ImportedArn: !ImportValue
+                    Fn::Sub:
+                      - "${DBStackName}-MasterSecretARN"
+                      - { DBStackName: !Ref DBStackName }
             - Name: DB_USERNAME
               ValueFrom: !Sub
-                - "${SecretArn}:username::"
-                - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
+                - "${ImportedArn}:username::"
+                - ImportedArn: !ImportValue
+                    Fn::Sub:
+                      - "${DBStackName}-MasterSecretARN"
+                      - { DBStackName: !Ref DBStackName }
             - Name: DB_PASSWORD
               ValueFrom: !Sub
-                - "${SecretArn}:password::"
-                - { SecretArn: !ImportValue "${DBStackName}-MasterSecretARN" }
+                - "${ImportedArn}:password::"
+                - ImportedArn: !ImportValue
+                    Fn::Sub:
+                      - "${DBStackName}-MasterSecretARN"
+                      - { DBStackName: !Ref DBStackName }
             - Name: ACCESS_TOKEN_SECRET_KEY
               ValueFrom: !ImportValue
                 Fn::Sub: "${SecretsManagerStackName}-AccessTokenSecretKeyArn"
