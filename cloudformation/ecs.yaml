@@ -114,7 +114,7 @@ Resources:
       DesiredCount: 1
       EnableECSManagedTags: true
       EnableExecuteCommand: true
-      HealthCheckGracePeriodSeconds: 60
+      HealthCheckGracePeriodSeconds: 120
       LaunchType: FARGATE
       LoadBalancers:
         - ContainerName: message-api-container
