@@ -172,6 +172,16 @@ jobs:
       - name: Notify deployment success
         run: echo "Successfully pushed ARM64 image ${{ github.sha }} (and latest) to ECR repository ${{ secrets.MESSAGE_API_ECR_REPOSITORY_NAME }}"
 
+  # ───────────────────────────────────────────────────────────────
+  # 【事前準備】ECSサービス用Service-Linked-Roleの作成
+  # 
+  # デプロイ先環境にまだService-Linked-Role「AWSServiceRoleForECS」が存在しない場合、以下のコマンドを実行して、手動で作成してください。
+  # 
+  #   aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com
+  # 
+  # ※cloudformationテンプレートの可搬性を高めるため、Service-Linked-Roleは手動で作成する運用としています。
+  # ※このロールはECSが内部的にENIの作成やALB登録を行う際に必須となります。
+  # ───────────────────────────────────────────────────────────────
   deploy-ecs:
     needs: [build_and_push_image, deploy-secrets-manager]
     runs-on: ubuntu-latest
