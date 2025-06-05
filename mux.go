@@ -16,7 +16,7 @@ import (
 )
 
 func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]func(), error) {
-	dbList := [3]string{"company", "student", "common"}
+	dbList := [4]string{"company", "student", "common", "message_scheduler"}
 	var dbHandlers = make(map[string]*sqlx.DB, len(dbList))
 	var dbCloseFuncs = make(map[string]func(), len(dbList))
 	var err error

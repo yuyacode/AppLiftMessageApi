@@ -60,6 +60,8 @@ func selectDB(cfg *config.Config, targetDB string) (string, error) {
 		return cfg.DBStudent, nil
 	} else if targetDB == "common" {
 		return cfg.DBCommon, nil
+	} else if targetDB == "message_scheduler" {
+		return cfg.DBMessageScheduler, nil
 	} else {
 		return "", fmt.Errorf("invalid database: %s", targetDB)
 	}

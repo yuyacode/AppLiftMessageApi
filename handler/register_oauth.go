@@ -26,7 +26,7 @@ func (ro *RegisterOAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var requestData struct {
 		APIKey  string `                validate:"required"`
 		UserID  int64  `json:"user_id"  validate:"required,numeric"`
-		AppKind string `json:"app_kind" validate:"required,oneof=company student"`
+		AppKind string `json:"app_kind" validate:"required,oneof=company student message_scheduler"`
 	}
 	apiKey, err := extractAuthorizationHeader(r)
 	if err != nil {

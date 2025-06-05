@@ -22,14 +22,14 @@ func init() {
 // example: go run -tags=batch batch.go --mode=generate_api_key --target=company
 func main() {
 	mode := flag.String("mode", "", "mode: 'generate_api_key' or 'generate_access_token_secret_key' or 'generate_refresh_token_secret_key'")
-	target := flag.String("target", "", "target: 'company' or 'student'")
+	target := flag.String("target", "", "target: 'company' or 'student' or 'message_scheduler'")
 	flag.Parse()
 	switch *mode {
 	case "generate_api_key":
 		if *target == "" {
 			log.Fatalf("missing required option '--target'")
 		}
-		if *target != "company" && *target != "student" {
+		if *target != "company" && *target != "student" && *target != "message_scheduler" {
 			log.Fatalf("invalid target")
 		}
 		apiKey, err := batch.GenerateAPIKey(*target)
