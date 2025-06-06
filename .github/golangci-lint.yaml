@@ -1,19 +1,36 @@
-linters-settings:
-  goimports:
-    local-prefixes: "github.com/yuyacode/AppLiftMessageApi"
+version: "2"
+
+issues:
+  exit-code: 1
+
+run:
+  tests: true
+  build-tags: []
+  skip-dirs:
+    - vendor
+
+formatters:
+  enable:
+    - goimports
+    - gofmt
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/yuyacode/AppLiftMessageApi
 
 linters:
-  disable-all: true
   enable:
     - bodyclose
-    - deadcode
     - errcheck
     - gocognit
     - gocritic
     - gocyclo
-    - gofmt
-    - goimports
     - govet
     - ineffassign
     - staticcheck
     - whitespace
+  settings:
+    gocognit:
+      min-complexity: 15
+    gocyclo:
+      min-complexity: 15

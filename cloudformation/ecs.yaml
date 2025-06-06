@@ -72,6 +72,8 @@ Resources:
               Value: student
             - Name: DB_COMMON
               Value: common
+            - Name: DB_MESSAGE_SCHEDULER
+              Value: message_scheduler
             # - Name: ALLOWED_ORIGIN
             #   Value: set_later
           Secrets:

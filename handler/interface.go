@@ -40,3 +40,7 @@ type EditMessageService interface {
 type DeleteMessageService interface {
 	DeleteMessage(ctx context.Context, id entity.MessageID) error
 }
+
+type SendScheduledMessageService interface {
+	SendScheduledMessage(ctx context.Context) error
+}
