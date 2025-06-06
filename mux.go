@@ -44,6 +44,8 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 	emHandler := handler.NewEditMessage(emService, v)
 	dmService := service.NewDeleteMessage(dbHandlers, messageRepo, messageRepo)
 	dmHandler := handler.NewDeleteMessage(dmService, v)
+	ssmService := service.NewSendScheduledMessage(dbHandlers, messageRepo)
+	ssmHandler := handler.NewSendScheduledMessage(ssmService, v)
 	mux := chi.NewRouter()
 	mux.Use(handler.CORSMiddleware())
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +64,7 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, map[string]f
 			r.Post("/", amHandler.ServeHTTP)
 			r.Patch("/{id}", emHandler.ServeHTTP)
 			r.Delete("/{id}", dmHandler.ServeHTTP)
+			r.Post("/send-scheduled", ssmHandler.ServeHTTP)
 		})
 	})
 	return mux, dbCloseFuncs, nil

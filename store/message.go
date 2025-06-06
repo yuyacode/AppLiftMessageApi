@@ -164,3 +164,12 @@ func (mr *MessageRepository) DeleteMessage(ctx context.Context, db Execer, id en
 	}
 	return nil
 }
+
+func (mr *MessageRepository) SendScheduledMessage(ctx context.Context, db Execer) error {
+	query := "UPDATE messages SET is_sent = 1, updated_at = ? WHERE is_sent = 0 and sent_at <= ? and deleted_at is null;"
+	_, err := db.ExecContext(ctx, query, mr.Clocker.Now(), mr.Clocker.Now())
+	if err != nil {
+		return err
+	}
+	return nil
+}

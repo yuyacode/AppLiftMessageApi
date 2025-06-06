@@ -50,3 +50,7 @@ type MessageEditor interface {
 type MessageDeleter interface {
 	DeleteMessage(ctx context.Context, db store.Execer, id entity.MessageID) error
 }
+
+type ScheduledMessageSender interface {
+	SendScheduledMessage(ctx context.Context, db store.Execer) error
+}
