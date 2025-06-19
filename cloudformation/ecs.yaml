@@ -162,12 +162,6 @@ Resources:
     Properties:
       PolicyName: target-tracking-cpu
       PolicyType: TargetTrackingScaling
-      ResourceId: !Join
-        - /
-        - - service
-          - !ImportValue
-              Fn::Sub: "${ECSClusterStackName}-Name"
-          - !GetAtt ECSService.Name
       ScalableDimension: ecs:service:DesiredCount
       ScalingTargetId: !Ref ScalableTarget
       ServiceNamespace: ecs
@@ -182,12 +176,6 @@ Resources:
     Properties:
       PolicyName: target-tracking-alb-rpm
       PolicyType: TargetTrackingScaling
-      ResourceId: !Join
-        - /
-        - - service
-          - !ImportValue
-              Fn::Sub: "${ECSClusterStackName}-Name"
-          - !GetAtt ECSService.Name
       ScalableDimension: ecs:service:DesiredCount
       ScalingTargetId: !Ref ScalableTarget
       ServiceNamespace: ecs
