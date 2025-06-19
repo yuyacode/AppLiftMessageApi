@@ -25,6 +25,10 @@ Parameters:
     Type: String
   SGStackName:
     Type: String
+  MaxTaskCount:
+    Type: String
+  MinTaskCount:
+    Type: String
 
 Resources:
   ECSTaskDefinition:
@@ -140,6 +144,65 @@ Resources:
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
       TaskDefinition: !Ref ECSTaskDefinition
+  ScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: !Ref MaxTaskCount
+      MinCapacity: !Ref MinTaskCount
+      ResourceId: !Join
+        - /
+        - - service
+          - !ImportValue
+              Fn::Sub: "${ECSClusterStackName}-Name"
+          - !GetAtt ECSService.Name
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+  ScalingPolicyCPU:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: target-tracking-cpu
+      PolicyType: TargetTrackingScaling
+      ResourceId: !Join
+        - /
+        - - service
+          - !ImportValue
+              Fn::Sub: "${ECSClusterStackName}-Name"
+          - !GetAtt ECSService.Name
+      ScalableDimension: ecs:service:DesiredCount
+      ScalingTargetId: !Ref ScalableTarget
+      ServiceNamespace: ecs
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        ScaleOutCooldown: 60
+        ScaleInCooldown: 180
+  ScalingPolicyALB:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: target-tracking-alb-rpm
+      PolicyType: TargetTrackingScaling
+      ResourceId: !Join
+        - /
+        - - service
+          - !ImportValue
+              Fn::Sub: "${ECSClusterStackName}-Name"
+          - !GetAtt ECSService.Name
+      ScalableDimension: ecs:service:DesiredCount
+      ScalingTargetId: !Ref ScalableTarget
+      ServiceNamespace: ecs
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 100
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ALBRequestCountPerTarget
+          ResourceLabel: !Join
+            - '/'
+            - - !ImportValue
+                Fn::Sub: "${ALBStackName}-PublicALBFullName"
+              - !ImportValue
+                Fn::Sub: "${ALBStackName}-MessageApiTargetGroupFullName"
+        ScaleOutCooldown: 30
+        ScaleInCooldown: 180
 
 Outputs:
   ECSServiceName:
