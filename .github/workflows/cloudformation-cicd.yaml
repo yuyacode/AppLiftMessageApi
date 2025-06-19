@@ -211,7 +211,9 @@ jobs:
               RoleStackName=Message-API-Role \
               ECSClusterStackName=ECS-Cluster \
               ALBStackName=ALB \
-              SGStackName=Security-Group
+              SGStackName=Security-Group \
+              MaxTaskCount=2 \
+              MinTaskCount=1
 
   deploy-role:
     needs: [cfn-lint, cfn-nag]
