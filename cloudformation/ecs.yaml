@@ -186,7 +186,7 @@ Resources:
           ResourceLabel: !Join
             - '/'
             - - !ImportValue
-                Fn::Sub: "${ALBStackName}-PublicALBFullName"
+                Fn::Sub: "${ALBStackName}-InternalALBFullName"
               - !ImportValue
                 Fn::Sub: "${ALBStackName}-MessageApiTargetGroupFullName"
         ScaleOutCooldown: 30
